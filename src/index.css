@@ -1,0 +1,48 @@
+@import "tailwindcss";
+    /* @tailwind base;
+    @tailwind components;
+    @tailwind utilities; */
+
+@theme{
+  --color-brand-primary: #b21f38;
+  --color-brand-primary-dark: #991b1b;
+  --color-brand-secondary: #f4b21d;
+  
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-error: #ef4444;
+  --color-status-info: #3b82f6;
+  
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+  
+  --color-surface-primary: #f8fafc;
+  --color-surface-white: #ffffff;
+  
+  --color-accent-purple: #8b5cf6;
+  --color-accent-sky-strong: #1d4ed8;
+  --color-accent-blue-mat: #2196F3;
+  --color-accent-amber: #FFC107;
+  --color-accent-red-deep: #F44336;
+  --color-accent-red-dark: #dc2626;
+  --color-accent-cyan: #06b6d4;
+  --color-accent-cyan-dark: #0891b2;
+  --color-accent-pink: #ec4899;
+  --color-accent-pink-dark: #db2777;
+  --color-accent-lime: #84cc16;
+  --color-accent-lime-dark: #65a30d;
+  
+  --shadow-card: 0 4px 6px rgba(0,0,0,0.05);
+  --shadow-card-lg: 0 8px 25px rgba(0,0,0,0.1);
+  
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
