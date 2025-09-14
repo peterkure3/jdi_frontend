@@ -1,25 +1,30 @@
 import { useState } from 'react';
+import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
-  ClockIcon,
-  CalendarDaysIcon,
-  DocumentTextIcon,
-  ArrowDownTrayIcon,
+  DocumentArrowDownIcon,
+  CalendarIcon,
   ChartBarIcon,
+  DocumentTextIcon,
+  ClockIcon,
+  EyeIcon,
   ArrowPathIcon,
-  PlayIcon,
-  ShareIcon,
-  TrashIcon,
+  ArrowDownTrayIcon,
+  TrashIcon
+} from '@heroicons/react/24/outline';
+import {
   PresentationChartLineIcon,
   ChartPieIcon,
   UsersIcon,
   CurrencyDollarIcon,
-  CalendarIcon,
   AcademicCapIcon,
   ServerIcon
 } from '@heroicons/react/24/outline';
 
 export default function Reports() {
-  const [selectedReport, setSelectedReport] = useState('academic');
+  const [showScheduleReportModal, setShowScheduleReportModal] = useState(false);
+  const [showViewReportModal, setShowViewReportModal] = useState(false);
+  const [showDeleteReportModal, setShowDeleteReportModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
   const [dateRange, setDateRange] = useState('current-semester');
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -35,6 +40,67 @@ export default function Reports() {
     const IconComponent = iconMap[iconName] || PresentationChartLineIcon;
     return <IconComponent className="w-4 h-4" />;
   };
+
+  const handleScheduleReport = async (reportData) => {
+    console.log('Scheduling report:', reportData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleViewReport = (report) => {
+    setSelectedReport(report);
+    setShowViewReportModal(true);
+  };
+
+  const handleDeleteReport = (report) => {
+    setSelectedReport(report);
+    setShowDeleteReportModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log('Deleting report:', selectedReport?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const scheduleReportFields = [
+    { name: 'reportName', label: 'Report Name', type: 'text', required: true, fullWidth: true },
+    { name: 'reportType', label: 'Report Type', type: 'select', required: true, options: [
+      { value: 'student_enrollment', label: 'Student Enrollment Report' },
+      { value: 'academic_performance', label: 'Academic Performance Report' },
+      { value: 'financial_summary', label: 'Financial Summary Report' },
+      { value: 'attendance_report', label: 'Attendance Report' },
+      { value: 'course_evaluation', label: 'Course Evaluation Report' },
+      { value: 'faculty_performance', label: 'Faculty Performance Report' }
+    ]},
+    { name: 'frequency', label: 'Frequency', type: 'select', required: true, options: [
+      { value: 'daily', label: 'Daily' },
+      { value: 'weekly', label: 'Weekly' },
+      { value: 'monthly', label: 'Monthly' },
+      { value: 'quarterly', label: 'Quarterly' },
+      { value: 'yearly', label: 'Yearly' },
+      { value: 'one_time', label: 'One Time' }
+    ]},
+    { name: 'startDate', label: 'Start Date', type: 'date', required: true },
+    { name: 'endDate', label: 'End Date', type: 'date' },
+    { name: 'recipients', label: 'Email Recipients', type: 'textarea', rows: 2, placeholder: 'Enter email addresses separated by commas', fullWidth: true },
+    { name: 'format', label: 'Output Format', type: 'select', required: true, options: [
+      { value: 'pdf', label: 'PDF' },
+      { value: 'excel', label: 'Excel' },
+      { value: 'csv', label: 'CSV' }
+    ]},
+    { name: 'includeCharts', label: 'Include Charts and Graphs', type: 'checkbox' },
+    { name: 'notes', label: 'Additional Notes', type: 'textarea', rows: 2, fullWidth: true }
+  ];
+
+  const reportViewFields = [
+    { name: 'name', label: 'Report Name', type: 'text' },
+    { name: 'type', label: 'Report Type', type: 'text' },
+    { name: 'status', label: 'Status', type: 'status' },
+    { name: 'lastGenerated', label: 'Last Generated', type: 'datetime' },
+    { name: 'nextScheduled', label: 'Next Scheduled', type: 'datetime' },
+    { name: 'frequency', label: 'Frequency', type: 'text' },
+    { name: 'format', label: 'Format', type: 'text' },
+    { name: 'recipients', label: 'Recipients', type: 'text' }
+  ];
 
   const reportTypes = [
     { id: 'academic', name: 'Academic Performance', icon: 'ChartLineIcon', description: 'Student grades, GPA trends, and course performance' },
@@ -62,7 +128,6 @@ export default function Reports() {
     }, 3000);
   };
 
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -76,8 +141,11 @@ export default function Reports() {
             <ClockIcon className="w-4 h-4" />
             Report History
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
-            <CalendarDaysIcon className="w-4 h-4" />
+          <button 
+            onClick={() => setShowScheduleReportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
+            <CalendarIcon className="w-4 h-4" />
             Schedule Report
           </button>
         </div>
@@ -92,7 +160,7 @@ export default function Reports() {
             </div>
             <div>
               <div className="text-2xl font-bold text-neutral-800">47</div>
-              <div className="text-sm text-neutral-500">Reports Generated</div>
+              <div className="text-sm text-neutral-600">Reports Generated</div>
             </div>
           </div>
         </div>
@@ -103,7 +171,7 @@ export default function Reports() {
             </div>
             <div>
               <div className="text-2xl font-bold text-neutral-800">234</div>
-              <div className="text-sm text-neutral-500">Total Downloads</div>
+              <div className="text-sm text-neutral-600">Total Downloads</div>
             </div>
           </div>
         </div>
@@ -114,7 +182,7 @@ export default function Reports() {
             </div>
             <div>
               <div className="text-2xl font-bold text-neutral-800">5</div>
-              <div className="text-sm text-neutral-500">Scheduled Reports</div>
+              <div className="text-sm text-neutral-600">Scheduled Reports</div>
             </div>
           </div>
         </div>
@@ -125,7 +193,7 @@ export default function Reports() {
             </div>
             <div>
               <div className="text-2xl font-bold text-neutral-800">12</div>
-              <div className="text-sm text-neutral-500">Report Types</div>
+              <div className="text-sm text-neutral-600">Report Types</div>
             </div>
           </div>
         </div>
@@ -218,12 +286,12 @@ export default function Reports() {
             >
               {isGenerating ? (
                 <>
-                  <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
+                  {/* <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" /> */}
                   Generating Report...
                 </>
               ) : (
                 <>
-                  <PlayIcon className="w-4 h-4 mr-2" />
+                  {/* <PlayIcon className="w-4 h-4 mr-2" /> */}
                   Generate Report
                 </>
               )}
@@ -276,13 +344,21 @@ export default function Reports() {
                   <td className="px-6 py-4 text-sm text-neutral-600">{report.downloads}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Download">
-                        <ArrowDownTrayIcon className="w-4 h-4" />
+                      <button 
+                        onClick={() => handleViewReport(report)}
+                        className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                        title="View Report"
+                      >
+                        <EyeIcon className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Share">
-                        <ShareIcon className="w-4 h-4" />
+                      <button className="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors" title="Regenerate">
+                        <ArrowPathIcon className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Delete">
+                      <button 
+                        onClick={() => handleDeleteReport(report)}
+                        className="p-2 text-status-error hover:bg-status-error/10 rounded-lg transition-colors" 
+                        title="Delete"
+                      >
                         <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
@@ -314,6 +390,57 @@ export default function Reports() {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <FormModal
+        isOpen={showScheduleReportModal}
+        onClose={() => setShowScheduleReportModal(false)}
+        onSubmit={handleScheduleReport}
+        title="Schedule Report"
+        subtitle="Set up automated report generation"
+        fields={scheduleReportFields}
+        submitText="Schedule Report"
+        mode="create"
+      />
+
+      <ViewModal
+        isOpen={showViewReportModal}
+        onClose={() => setShowViewReportModal(false)}
+        title="Report Details"
+        subtitle="View report configuration and status"
+        data={selectedReport}
+        fields={reportViewFields}
+        actions={[
+          {
+            label: 'Edit Schedule',
+            onClick: () => {
+              setShowViewReportModal(false);
+              console.log('Edit report schedule:', selectedReport?.id);
+            },
+            className: 'bg-brand-primary hover:bg-brand-primary-dark text-white',
+            icon: CalendarIcon
+          },
+          {
+            label: 'Generate Now',
+            onClick: () => {
+              setShowViewReportModal(false);
+              console.log('Generate report now:', selectedReport?.id);
+            },
+            className: 'bg-accent-green hover:bg-accent-green-dark text-white',
+            icon: ArrowPathIcon
+          }
+        ]}
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteReportModal}
+        onClose={() => setShowDeleteReportModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Scheduled Report"
+        message={`Are you sure you want to delete the scheduled report "${selectedReport?.name}"? This will stop all future automated generation of this report.`}
+        confirmText="Delete Report"
+        type="danger"
+      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportModal, FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   ArrowDownTrayIcon,
   PlusIcon,
@@ -14,6 +15,12 @@ import {
 export default function Applications() {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showNewApplicationModal, setShowNewApplicationModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showBulkApproveModal, setShowBulkApproveModal] = useState(false);
+  const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState(null);
 
   const applications = [
     { id: 1, name: 'Sarah Johnson', email: 'sarah.j@email.com', course: 'Computer Science', status: 'pending', date: '2025-01-08', gpa: '3.8' },
@@ -47,6 +54,58 @@ export default function Applications() {
     // In a real app, this would update the backend
   };
 
+  const handleExportApplications = async (exportOptions) => {
+    console.log('Exporting applications:', exportOptions);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  };
+
+  const handleNewApplication = async (applicationData) => {
+    console.log('Creating new application:', applicationData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleViewApplication = (application) => {
+    setSelectedApplication(application);
+    setShowViewModal(true);
+  };
+
+  const handleBulkApprove = async () => {
+    console.log('Bulk approving applications');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleBulkReject = async () => {
+    console.log('Bulk rejecting applications');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const newApplicationFields = [
+    { name: 'firstName', label: 'First Name', type: 'text', required: true },
+    { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+    { name: 'email', label: 'Email Address', type: 'email', required: true },
+    { name: 'phone', label: 'Phone Number', type: 'text', required: true },
+    { name: 'course', label: 'Desired Course', type: 'select', required: true, options: [
+      { value: 'computer_science', label: 'Computer Science' },
+      { value: 'engineering', label: 'Engineering' },
+      { value: 'business', label: 'Business Administration' },
+      { value: 'mathematics', label: 'Mathematics' },
+      { value: 'physics', label: 'Physics' }
+    ]},
+    { name: 'gpa', label: 'GPA', type: 'number', required: true, min: 0, max: 4, step: 0.1 },
+    { name: 'previousEducation', label: 'Previous Education', type: 'textarea', rows: 2, fullWidth: true },
+    { name: 'personalStatement', label: 'Personal Statement', type: 'textarea', rows: 4, fullWidth: true, required: true },
+    { name: 'documents', label: 'Required Documents Submitted', type: 'checkbox', checkboxLabel: 'All required documents have been submitted' }
+  ];
+
+  const applicationViewFields = [
+    { name: 'name', label: 'Full Name', type: 'text' },
+    { name: 'email', label: 'Email Address', type: 'email' },
+    { name: 'course', label: 'Applied Course', type: 'text' },
+    { name: 'gpa', label: 'GPA', type: 'text' },
+    { name: 'date', label: 'Application Date', type: 'date' },
+    { name: 'status', label: 'Status', type: 'status' }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -56,11 +115,17 @@ export default function Applications() {
           <p className="text-neutral-600 mt-1">Manage student applications and admissions</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={() => setShowExportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
             Export
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={() => setShowNewApplicationModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             New Application
           </button>
@@ -200,7 +265,11 @@ export default function Applications() {
                       >
                         <XMarkIcon className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Details">
+                      <button 
+                        onClick={() => handleViewApplication(app)}
+                        className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                        title="View Details"
+                      >
                         <EyeIcon className="w-4 h-4" />
                       </button>
                     </div>
@@ -222,15 +291,94 @@ export default function Applications() {
             <button className="px-3 py-1 text-sm text-neutral-600 hover:text-neutral-800 transition-colors">
               Select All
             </button>
-            <button className="px-4 py-2 bg-status-success text-white rounded-lg text-sm hover:bg-status-success/90 transition-colors">
+            <button 
+              onClick={() => setShowBulkApproveModal(true)}
+              className="px-4 py-2 bg-status-success text-white rounded-lg text-sm hover:bg-status-success/90 transition-colors"
+            >
               Bulk Approve
             </button>
-            <button className="px-4 py-2 bg-status-error text-white rounded-lg text-sm hover:bg-status-error/90 transition-colors">
+            <button 
+              onClick={() => setShowBulkRejectModal(true)}
+              className="px-4 py-2 bg-status-error text-white rounded-lg text-sm hover:bg-status-error/90 transition-colors"
+            >
               Bulk Reject
             </button>
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExportApplications}
+        title="Export Applications"
+        subtitle="Export application data and statistics"
+        dataType="applications"
+        availableFormats={['pdf', 'excel', 'csv']}
+        includeFilters={true}
+        currentFilters={{ status: filter, search: searchTerm }}
+      />
+
+      <FormModal
+        isOpen={showNewApplicationModal}
+        onClose={() => setShowNewApplicationModal(false)}
+        onSubmit={handleNewApplication}
+        title="New Application"
+        subtitle="Create a new student application"
+        fields={newApplicationFields}
+        submitText="Submit Application"
+        mode="create"
+      />
+
+      <ViewModal
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title="Application Details"
+        subtitle="View complete application information"
+        data={selectedApplication}
+        fields={applicationViewFields}
+        actions={[
+          {
+            label: 'Approve',
+            onClick: () => {
+              handleStatusChange(selectedApplication?.id, 'approved');
+              setShowViewModal(false);
+            },
+            className: 'bg-status-success hover:bg-status-success/90 text-white',
+            icon: CheckIcon
+          },
+          {
+            label: 'Reject',
+            onClick: () => {
+              handleStatusChange(selectedApplication?.id, 'rejected');
+              setShowViewModal(false);
+            },
+            className: 'bg-status-error hover:bg-status-error/90 text-white',
+            icon: XMarkIcon
+          }
+        ]}
+      />
+
+      <ConfirmationModal
+        isOpen={showBulkApproveModal}
+        onClose={() => setShowBulkApproveModal(false)}
+        onConfirm={handleBulkApprove}
+        title="Bulk Approve Applications"
+        message={`Are you sure you want to approve all selected applications? This action cannot be undone.`}
+        confirmText="Approve All"
+        type="info"
+      />
+
+      <ConfirmationModal
+        isOpen={showBulkRejectModal}
+        onClose={() => setShowBulkRejectModal(false)}
+        onConfirm={handleBulkReject}
+        title="Bulk Reject Applications"
+        message={`Are you sure you want to reject all selected applications? This action cannot be undone.`}
+        confirmText="Reject All"
+        type="danger"
+      />
     </div>
   );
 }

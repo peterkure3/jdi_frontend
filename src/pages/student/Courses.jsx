@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   CalendarIcon,
   PlusIcon,
@@ -7,11 +8,19 @@ import {
   StarIcon,
   ListBulletIcon,
   FolderIcon,
-  AcademicCapIcon
+  AcademicCapIcon,
+  EyeIcon,
+  DocumentTextIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 
 export default function Courses() {
   const [filter, setFilter] = useState('all');
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [showViewCourseModal, setShowViewCourseModal] = useState(false);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [showDropModal, setShowDropModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const courses = [
     { 
@@ -115,6 +124,90 @@ export default function Courses() {
     }
   };
 
+  // Handler functions
+  const handleEnrollCourse = async (enrollmentData) => {
+    console.log('Enrolling in course:', enrollmentData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowEnrollModal(false);
+  };
+
+  const handleViewCourse = (course) => {
+    setSelectedCourse(course);
+    setShowViewCourseModal(true);
+  };
+
+  const handleContinueLearning = (course) => {
+    console.log('Continuing learning for course:', course.id);
+    // Navigate to course content page
+  };
+
+  const handleViewMaterials = (course) => {
+    console.log('Viewing materials for course:', course.id);
+    // Navigate to materials page or open materials modal
+  };
+
+  const handleSubmitAssignment = (course) => {
+    setSelectedCourse(course);
+    setShowAssignmentModal(true);
+  };
+
+  const handleAssignmentSubmission = async (submissionData) => {
+    console.log('Submitting assignment for course:', selectedCourse?.id, submissionData);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setShowAssignmentModal(false);
+  };
+
+  const handleDropCourse = (course) => {
+    setSelectedCourse(course);
+    setShowDropModal(true);
+  };
+
+  const handleConfirmDrop = async () => {
+    console.log('Dropping course:', selectedCourse?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setShowDropModal(false);
+  };
+
+  const handleViewCertificate = (course) => {
+    console.log('Viewing certificate for course:', course.id);
+    // Generate and download certificate
+  };
+
+  const handleViewSchedule = () => {
+    console.log('Viewing schedule');
+    // Navigate to schedule page
+  };
+
+  // Field definitions
+  const enrollmentFields = [
+    { name: 'courseCode', label: 'Course Code', type: 'text', required: true },
+    { name: 'semester', label: 'Semester', type: 'select', required: true, options: [
+      { value: 'fall2024', label: 'Fall 2024' },
+      { value: 'spring2025', label: 'Spring 2025' },
+      { value: 'summer2025', label: 'Summer 2025' }
+    ]},
+    { name: 'reason', label: 'Reason for Enrollment', type: 'textarea', rows: 3, fullWidth: true }
+  ];
+
+  const courseViewFields = [
+    { name: 'name', label: 'Course Name', type: 'text' },
+    { name: 'code', label: 'Course Code', type: 'text' },
+    { name: 'instructor', label: 'Instructor', type: 'text' },
+    { name: 'credits', label: 'Credits', type: 'text' },
+    { name: 'grade', label: 'Current Grade', type: 'text' },
+    { name: 'progress', label: 'Progress', type: 'text' },
+    { name: 'status', label: 'Status', type: 'status' },
+    { name: 'nextClass', label: 'Next Class', type: 'text' },
+    { name: 'description', label: 'Description', type: 'text', fullWidth: true }
+  ];
+
+  const assignmentFields = [
+    { name: 'title', label: 'Assignment Title', type: 'text', required: true, fullWidth: true },
+    { name: 'description', label: 'Submission Notes', type: 'textarea', rows: 4, fullWidth: true },
+    { name: 'file', label: 'Upload File', type: 'file', required: true },
+    { name: 'lateSubmission', label: 'This is a late submission', type: 'checkbox' }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -124,11 +217,17 @@ export default function Courses() {
           <p className="text-neutral-600 mt-1">Track your course progress and continue learning</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={handleViewSchedule}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <CalendarIcon className="w-4 h-4" />
             View Schedule
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={() => setShowEnrollModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             Enroll Course
           </button>
@@ -265,24 +364,55 @@ export default function Courses() {
               <div className="flex items-center gap-2">
                 {course.status === 'active' ? (
                   <>
-                    <button className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+                    <button 
+                      onClick={() => handleContinueLearning(course)}
+                      className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+                    >
                       Continue Learning
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Materials">
+                    <button 
+                      onClick={() => handleViewMaterials(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="View Materials"
+                    >
                       <FolderIcon className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleSubmitAssignment(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="Submit Assignment"
+                    >
+                      <ClipboardDocumentListIcon className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleViewCourse(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="View Details"
+                    >
+                      <EyeIcon className="w-4 h-4" />
                     </button>
                   </>
                 ) : course.status === 'completed' ? (
                   <>
-                    <button className="flex-1 bg-status-success text-white rounded-lg py-2 text-sm font-medium">
+                    <button 
+                      onClick={() => handleViewCourse(course)}
+                      className="flex-1 bg-status-success text-white rounded-lg py-2 text-sm font-medium"
+                    >
                       Completed
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Certificate">
+                    <button 
+                      onClick={() => handleViewCertificate(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="View Certificate"
+                    >
                       <AcademicCapIcon className="w-4 h-4" />
                     </button>
                   </>
                 ) : (
-                  <button className="w-full bg-neutral-100 text-neutral-600 rounded-lg py-2 text-sm font-medium">
+                  <button 
+                    onClick={() => handleViewCourse(course)}
+                    className="w-full bg-neutral-100 text-neutral-600 rounded-lg py-2 text-sm font-medium"
+                  >
                     Course Dropped
                   </button>
                 )}
@@ -291,6 +421,59 @@ export default function Courses() {
           </div>
         ))}
       </div>
+
+      {/* Modals */}
+      <FormModal
+        isOpen={showEnrollModal}
+        onClose={() => setShowEnrollModal(false)}
+        onSubmit={handleEnrollCourse}
+        title="Enroll in Course"
+        subtitle="Request enrollment in a new course"
+        fields={enrollmentFields}
+        submitText="Submit Enrollment Request"
+        mode="create"
+      />
+
+      <ViewModal
+        isOpen={showViewCourseModal}
+        onClose={() => setShowViewCourseModal(false)}
+        title="Course Details"
+        subtitle="View course information and progress"
+        data={selectedCourse || {}}
+        fields={courseViewFields}
+        actions={[
+          {
+            label: 'Drop Course',
+            onClick: () => {
+              setShowViewCourseModal(false);
+              handleDropCourse(selectedCourse);
+            },
+            variant: 'danger'
+          }
+        ]}
+      />
+
+      <FormModal
+        isOpen={showAssignmentModal}
+        onClose={() => setShowAssignmentModal(false)}
+        onSubmit={handleAssignmentSubmission}
+        title="Submit Assignment"
+        subtitle={`Submit assignment for ${selectedCourse?.name || 'course'}`}
+        fields={assignmentFields}
+        submitText="Submit Assignment"
+        mode="create"
+      />
+
+      <ConfirmationModal
+        isOpen={showDropModal}
+        onClose={() => setShowDropModal(false)}
+        onConfirm={handleConfirmDrop}
+        title="Drop Course"
+        message={`Are you sure you want to drop "${selectedCourse?.name}"? This action may affect your academic progress and cannot be easily undone.`}
+        confirmText="Drop Course"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

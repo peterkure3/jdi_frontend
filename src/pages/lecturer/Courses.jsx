@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormModal, ViewModal, ImportModal } from '../../components/shared/modals';
 import MessageComposeModal from '../../components/shared/MessageComposeModal';
 import {
   EnvelopeIcon,
@@ -13,12 +14,18 @@ import {
   DocumentTextIcon,
   CogIcon,
   ChartPieIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  ArrowUpTrayIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 
 export default function Courses() {
   const [filter, setFilter] = useState('active');
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
+  const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
+  const [showViewCourseModal, setShowViewCourseModal] = useState(false);
+  const [showMaterialsModal, setShowMaterialsModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const courses = [
     {
@@ -119,6 +126,81 @@ export default function Courses() {
     return 'text-status-success';
   };
 
+  // Handler functions
+  const handleCreateCourse = async (courseData) => {
+    console.log('Creating course:', courseData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowCreateCourseModal(false);
+  };
+
+  const handleViewCourse = (course) => {
+    setSelectedCourse(course);
+    setShowViewCourseModal(true);
+  };
+
+  const handleManageCourse = (course) => {
+    console.log('Managing course:', course.id);
+    // Navigate to course management page
+  };
+
+  const handleViewStudents = (course) => {
+    console.log('Viewing students for course:', course.id);
+    // Navigate to students page or open students modal
+  };
+
+  const handleGradebook = (course) => {
+    console.log('Opening gradebook for course:', course.id);
+    // Navigate to gradebook page
+  };
+
+  const handleUploadMaterials = (course) => {
+    setSelectedCourse(course);
+    setShowMaterialsModal(true);
+  };
+
+  const handleMaterialsUpload = async (file) => {
+    console.log('Uploading materials for course:', selectedCourse?.id, file.name);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setShowMaterialsModal(false);
+  };
+
+  const handleViewAnalytics = (course) => {
+    console.log('Viewing analytics for course:', course?.id || 'all courses');
+    // Navigate to analytics page
+  };
+
+  const handleCreateAssignment = () => {
+    console.log('Creating new assignment');
+    // Navigate to assignment creation page
+  };
+
+  // Field definitions
+  const courseFields = [
+    { name: 'name', label: 'Course Name', type: 'text', required: true, fullWidth: true },
+    { name: 'code', label: 'Course Code', type: 'text', required: true },
+    { name: 'semester', label: 'Semester', type: 'select', required: true, options: [
+      { value: 'fall2024', label: 'Fall 2024' },
+      { value: 'spring2025', label: 'Spring 2025' },
+      { value: 'summer2025', label: 'Summer 2025' }
+    ]},
+    { name: 'capacity', label: 'Student Capacity', type: 'number', required: true },
+    { name: 'schedule', label: 'Schedule', type: 'text', required: true },
+    { name: 'room', label: 'Room Assignment', type: 'text', required: true },
+    { name: 'description', label: 'Course Description', type: 'textarea', required: true, rows: 4, fullWidth: true }
+  ];
+
+  const courseViewFields = [
+    { name: 'name', label: 'Course Name', type: 'text' },
+    { name: 'code', label: 'Course Code', type: 'text' },
+    { name: 'semester', label: 'Semester', type: 'text' },
+    { name: 'students', label: 'Enrolled Students', type: 'text' },
+    { name: 'capacity', label: 'Capacity', type: 'text' },
+    { name: 'schedule', label: 'Schedule', type: 'text' },
+    { name: 'room', label: 'Room', type: 'text' },
+    { name: 'status', label: 'Status', type: 'status' },
+    { name: 'description', label: 'Description', type: 'text', fullWidth: true }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -139,7 +221,10 @@ export default function Courses() {
             <CalendarIcon className="w-4 h-4" />
             View Schedule
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={() => setShowCreateCourseModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             Create Course
           </button>
@@ -281,31 +366,70 @@ export default function Courses() {
               <div className="flex items-center gap-2">
                 {course.status === 'active' ? (
                   <>
-                    <button className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+                    <button 
+                      onClick={() => handleManageCourse(course)}
+                      className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+                    >
                       Manage Course
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Students">
+                    <button 
+                      onClick={() => handleViewStudents(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="View Students"
+                    >
                       <UsersIcon className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Gradebook">
+                    <button 
+                      onClick={() => handleGradebook(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="Gradebook"
+                    >
                       <ChartBarIcon className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleUploadMaterials(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="Upload Materials"
+                    >
+                      <ArrowUpTrayIcon className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleViewCourse(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="View Details"
+                    >
+                      <EyeIcon className="w-4 h-4" />
                     </button>
                   </>
                 ) : course.status === 'completed' ? (
                   <>
-                    <button className="flex-1 bg-status-info text-white rounded-lg py-2 text-sm font-medium">
+                    <button 
+                      onClick={() => handleViewCourse(course)}
+                      className="flex-1 bg-status-info text-white rounded-lg py-2 text-sm font-medium"
+                    >
                       View Archive
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Course Report">
+                    <button 
+                      onClick={() => handleViewAnalytics(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="Course Report"
+                    >
                       <DocumentTextIcon className="w-4 h-4" />
                     </button>
                   </>
                 ) : (
                   <>
-                    <button className="flex-1 bg-status-warning text-white rounded-lg py-2 text-sm font-medium">
+                    <button 
+                      onClick={() => handleManageCourse(course)}
+                      className="flex-1 bg-status-warning text-white rounded-lg py-2 text-sm font-medium"
+                    >
                       Prepare Course
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Course Setup">
+                    <button 
+                      onClick={() => handleViewCourse(course)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="Course Setup"
+                    >
                       <CogIcon className="w-4 h-4" />
                     </button>
                   </>
@@ -324,7 +448,10 @@ export default function Courses() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Create Assignment</h4>
           <p className="text-sm text-neutral-600 mb-4">Add new assignments for your courses</p>
-          <button className="w-full bg-accent-purple hover:bg-accent-purple/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button 
+            onClick={handleCreateAssignment}
+            className="w-full bg-accent-purple hover:bg-accent-purple/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             New Assignment
           </button>
         </div>
@@ -335,7 +462,10 @@ export default function Courses() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Analytics</h4>
           <p className="text-sm text-neutral-600 mb-4">View course performance and statistics</p>
-          <button className="w-full bg-status-success hover:bg-status-success/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button 
+            onClick={() => handleViewAnalytics()}
+            className="w-full bg-status-success hover:bg-status-success/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             View Analytics
           </button>
         </div>
@@ -346,13 +476,46 @@ export default function Courses() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Communication</h4>
           <p className="text-sm text-neutral-600 mb-4">Send announcements to students</p>
-          <button className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button 
+            onClick={() => setIsComposeModalOpen(true)}
+            className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Send Message
           </button>
         </div>
       </div>
 
-      {/* Message Compose Modal */}
+      {/* Modals */}
+      <FormModal
+        isOpen={showCreateCourseModal}
+        onClose={() => setShowCreateCourseModal(false)}
+        onSubmit={handleCreateCourse}
+        title="Create Course"
+        subtitle="Create a new course for the upcoming semester"
+        fields={courseFields}
+        submitText="Create Course"
+        mode="create"
+      />
+
+      <ViewModal
+        isOpen={showViewCourseModal}
+        onClose={() => setShowViewCourseModal(false)}
+        title="Course Details"
+        subtitle="View course information and statistics"
+        data={selectedCourse || {}}
+        fields={courseViewFields}
+      />
+
+      <ImportModal
+        isOpen={showMaterialsModal}
+        onClose={() => setShowMaterialsModal(false)}
+        onImport={handleMaterialsUpload}
+        title="Upload Course Materials"
+        subtitle={`Upload materials for ${selectedCourse?.name || 'course'}`}
+        acceptedFormats={['.pdf', '.pptx', '.docx', '.xlsx', '.zip']}
+        maxFileSize={50}
+      />
+
       <MessageComposeModal 
         isOpen={isComposeModalOpen}
         onClose={() => setIsComposeModalOpen(false)}

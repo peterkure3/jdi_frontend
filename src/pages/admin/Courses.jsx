@@ -1,27 +1,34 @@
 import { useState } from 'react';
+import { ExportModal, ImportModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
+  AcademicCapIcon,
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
-  PlusIcon,
   BookOpenIcon,
-  PlayIcon,
-  UsersIcon,
-  PercentBadgeIcon,
-  MagnifyingGlassIcon,
-  UserIcon,
   CalendarIcon,
-  AcademicCapIcon,
-  PencilIcon,
+  PlusIcon,
+  MagnifyingGlassIcon,
   EyeIcon,
+  PencilIcon,
+  PlayIcon,
   DocumentDuplicateIcon,
   TrashIcon,
+  UserIcon,
+  UsersIcon,
+  PercentBadgeIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
 
 export default function Courses() {
-  const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({
     code: '',
     name: '',
@@ -116,7 +123,7 @@ export default function Courses() {
   ];
 
   const filteredCourses = courses.filter(course => {
-    const matchesFilter = filter === 'all' || course.status === filter;
+    const matchesFilter = departmentFilter === 'all' || course.department === departmentFilter;
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.lecturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -141,49 +148,63 @@ export default function Courses() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleAddCourse = (e) => {
     e.preventDefault();
-    // Add validation here
-    if (!newCourse.code || !newCourse.name || !newCourse.department) {
-      alert('Please fill in all required fields');
-      return;
-    }
-    
-    // Here you would typically send the data to your backend
-    console.log('Adding new course:', newCourse);
-    
-    // Reset form and close modal
-    setNewCourse({
-      code: '',
-      name: '',
-      department: '',
-      lecturer: '',
-      credits: '',
-      capacity: '',
-      semester: '',
-      schedule: '',
-      description: ''
-    });
+    console.log('Adding course:', newCourse);
     setShowAddModal(false);
-    
-    // Show success message (you could use a toast library)
-    alert('Course added successfully!');
+    setNewCourse({ name: '', code: '', department: '', credits: '', lecturer: '', description: '' });
   };
 
-  const handleCloseModal = () => {
-    setShowAddModal(false);
-    setNewCourse({
-      code: '',
-      name: '',
-      department: '',
-      lecturer: '',
-      credits: '',
-      capacity: '',
-      semester: '',
-      schedule: '',
-      description: ''
-    });
+  const handleExportCourses = async (exportOptions) => {
+    console.log('Exporting courses with options:', exportOptions);
+    await new Promise(resolve => setTimeout(resolve, 2000));
   };
+
+  const handleImportCourses = async (file) => {
+    console.log('Importing courses from file:', file.name);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  };
+
+  const handleViewCourse = (course) => {
+    setSelectedCourse(course);
+    setShowViewModal(true);
+  };
+
+  const handleEditCourse = (course) => {
+    console.log('Edit course:', course.id);
+    // Edit functionality can be implemented here
+  };
+
+  const handleDuplicateCourse = (course) => {
+    setSelectedCourse(course);
+    setShowDuplicateModal(true);
+  };
+
+  const handleConfirmDuplicate = async () => {
+    console.log('Duplicating course:', selectedCourse?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleDeleteCourse = (course) => {
+    setSelectedCourse(course);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log('Deleting course:', selectedCourse?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const courseViewFields = [
+    { name: 'name', label: 'Course Name', type: 'text' },
+    { name: 'code', label: 'Course Code', type: 'text' },
+    { name: 'department', label: 'Department', type: 'text' },
+    { name: 'credits', label: 'Credits', type: 'text' },
+    { name: 'lecturer', label: 'Lecturer', type: 'text' },
+    { name: 'students', label: 'Enrolled Students', type: 'text' },
+    { name: 'schedule', label: 'Schedule', type: 'text' },
+    { name: 'status', label: 'Status', type: 'status' }
+  ];
 
   const getDepartmentColor = (department) => {
     const colors = {
@@ -216,11 +237,17 @@ export default function Courses() {
           <p className="text-neutral-600 mt-1">Manage course offerings and enrollment</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={() => setShowExportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
             Export
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={() => setShowImportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowUpTrayIcon className="w-4 h-4" />
             Import
           </button>
@@ -286,17 +313,17 @@ export default function Courses() {
       <div className="bg-white rounded-xl shadow-card p-6">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="flex flex-wrap gap-2">
-            {['all', 'active', 'draft', 'archived'].map(status => (
+            {['all', 'Computer Science', 'Mathematics', 'English', 'Physics', 'Business'].map(department => (
               <button
-                key={status}
-                onClick={() => setFilter(status)}
+                key={department}
+                onClick={() => setDepartmentFilter(department)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all capitalize ${
-                  filter === status
+                  departmentFilter === department
                     ? 'bg-brand-primary text-white shadow-sm'
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }`}
               >
-                {status}
+                {department}
               </button>
             ))}
           </div>
@@ -373,16 +400,32 @@ export default function Courses() {
 
               {/* Actions */}
               <div className="flex items-center gap-2">
-                <button className="flex-1 bg-brand-primary text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-brand-primaryDark transition-colors">
-                  Edit
-                </button>
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Details">
+                <button 
+                  onClick={() => handleViewCourse(course)}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                  title="View Details"
+                >
                   <EyeIcon className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Duplicate">
+                <button 
+                  onClick={() => handleEditCourse(course)}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                  title="Edit"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => handleDuplicateCourse(course)}
+                  className="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors" 
+                  title="Duplicate"
+                >
                   <DocumentDuplicateIcon className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                <button 
+                  onClick={() => handleDeleteCourse(course)}
+                  className="p-2 text-status-error hover:bg-status-error/10 rounded-lg transition-colors" 
+                  title="Delete"
+                >
                   <TrashIcon className="w-4 h-4" />
                 </button>
               </div>
@@ -408,7 +451,10 @@ export default function Courses() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Create Course</h4>
           <p className="text-sm text-neutral-600 mb-4">Add a new course to the curriculum</p>
-          <button className="w-full bg-status-success hover:bg-status-success/90-600 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="w-full bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             New Course
           </button>
         </div>
@@ -419,7 +465,9 @@ export default function Courses() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Manage Enrollment</h4>
           <p className="text-sm text-neutral-600 mb-4">View and manage student enrollments</p>
-          <button className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button 
+            className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             View Enrollments
           </button>
         </div>
@@ -430,7 +478,9 @@ export default function Courses() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Schedule Builder</h4>
           <p className="text-sm text-neutral-600 mb-4">Create and manage course schedules</p>
-          <button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button 
+            className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Build Schedule
           </button>
         </div>
@@ -452,7 +502,7 @@ export default function Courses() {
                 </div>
               </div>
               <button
-                onClick={handleCloseModal}
+                onClick={() => setShowAddModal(false)}
                 className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -460,7 +510,7 @@ export default function Courses() {
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6">
+            <form onSubmit={handleAddCourse} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Course Code */}
                 <div>
@@ -618,7 +668,7 @@ export default function Courses() {
               <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-neutral-200">
                 <button
                   type="button"
-                  onClick={handleCloseModal}
+                  onClick={() => setShowAddModal(false)}
                   className="px-6 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
                 >
                   Cancel
@@ -635,6 +685,81 @@ export default function Courses() {
           </div>
         </div>
       )}
+
+      {/* Modals */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExportCourses}
+        title="Export Courses"
+        subtitle="Export course data in your preferred format"
+        entityName="courses"
+      />
+
+      <ImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImportCourses}
+        title="Import Courses"
+        subtitle="Upload a file to import course data"
+        acceptedFormats={['.csv', '.xlsx']}
+        maxFileSize={5}
+        templateUrl="/templates/courses-template.csv"
+        sampleData={[
+          'Course Name,Course Code,Department,Credits,Lecturer,Description',
+          'Introduction to Programming,CS101,Computer Science,3,Dr. Smith,Basic programming concepts',
+          'Calculus I,MATH101,Mathematics,4,Prof. Johnson,Differential and integral calculus'
+        ]}
+      />
+
+      <ViewModal
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title="Course Details"
+        subtitle="View complete course information"
+        data={selectedCourse}
+        fields={courseViewFields}
+        actions={[
+          {
+            label: 'Edit Course',
+            onClick: () => {
+              setShowViewModal(false);
+              handleEditCourse(selectedCourse);
+            },
+            className: 'bg-brand-primary hover:bg-brand-primary-dark text-white',
+            icon: PencilIcon
+          },
+          {
+            label: 'Duplicate Course',
+            onClick: () => {
+              setShowViewModal(false);
+              handleDuplicateCourse(selectedCourse);
+            },
+            className: 'bg-neutral-600 hover:bg-neutral-700 text-white',
+            icon: DocumentDuplicateIcon
+          }
+        ]}
+      />
+
+      <ConfirmationModal
+        isOpen={showDuplicateModal}
+        onClose={() => setShowDuplicateModal(false)}
+        onConfirm={handleConfirmDuplicate}
+        title="Duplicate Course"
+        message={`Are you sure you want to create a duplicate of "${selectedCourse?.name}"? A new course will be created with the same details.`}
+        confirmText="Duplicate Course"
+        type="info"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Course"
+        message={`Are you sure you want to permanently delete "${selectedCourse?.name}"? This action cannot be undone and will affect all enrolled students.`}
+        confirmText="Delete Course"
+        type="danger"
+      />
     </div>
   );
 }

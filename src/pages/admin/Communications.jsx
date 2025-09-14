@@ -1,21 +1,29 @@
 import { useState } from 'react';
+import { FormModal, ImportModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
-  DocumentArrowUpIcon,
   PlusIcon,
-  SpeakerWaveIcon,
-  EnvelopeIcon,
-  UsersIcon,
-  EyeIcon,
+  ArrowUpTrayIcon,
+  CircleStackIcon,
   DocumentTextIcon,
+  SpeakerWaveIcon,
+  MagnifyingGlassIcon,
+  PaperAirplaneIcon,
+  EyeIcon,
   PencilIcon,
   TrashIcon,
-  CircleStackIcon
+  UserGroupIcon,
+  EnvelopeIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 export default function Communications() {
-  const [activeTab, setActiveTab] = useState('announcements');
-  const [selectedRecipients, setSelectedRecipients] = useState('all');
-  const [messageType, setMessageType] = useState('announcement');
+  const [activeTab, setActiveTab] = useState('messages');
+  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
+  const [showImportContactsModal, setShowImportContactsModal] = useState(false);
+  const [showViewMessageModal, setShowViewMessageModal] = useState(false);
+  const [showEditMessageModal, setShowEditMessageModal] = useState(false);
+  const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState(null);
 
   const announcements = [
     {
@@ -102,6 +110,79 @@ export default function Communications() {
     }
   };
 
+  const handleNewMessage = async (messageData) => {
+    console.log('Sending new message:', messageData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowNewMessageModal(false);
+  };
+
+  const handleViewMessage = (message) => {
+    setSelectedMessage(message);
+    setShowViewMessageModal(true);
+  };
+
+  const handleEditMessage = (message) => {
+    setSelectedMessage(message);
+    setShowEditMessageModal(true);
+  };
+
+  const handleUpdateMessage = async (messageData) => {
+    console.log('Updating message:', selectedMessage?.id, messageData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowEditMessageModal(false);
+  };
+
+  const handleDeleteMessage = (message) => {
+    setSelectedMessage(message);
+    setShowDeleteMessageModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log('Deleting message:', selectedMessage?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setShowDeleteMessageModal(false);
+  };
+
+  const handleImportContacts = async (file) => {
+    console.log('Importing contacts from file:', file.name);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    setShowImportContactsModal(false);
+  };
+
+  const newMessageFields = [
+    { name: 'recipients', label: 'Recipients', type: 'select', required: true, options: [
+      { value: 'all_students', label: 'All Students' },
+      { value: 'all_faculty', label: 'All Faculty' },
+      { value: 'all_staff', label: 'All Staff' },
+      { value: 'specific_group', label: 'Specific Group' }
+    ]},
+    { name: 'subject', label: 'Subject', type: 'text', required: true, fullWidth: true },
+    { name: 'messageType', label: 'Message Type', type: 'select', required: true, options: [
+      { value: 'announcement', label: 'Announcement' },
+      { value: 'notification', label: 'Notification' },
+      { value: 'reminder', label: 'Reminder' },
+      { value: 'alert', label: 'Alert' }
+    ]},
+    { name: 'priority', label: 'Priority', type: 'select', required: true, options: [
+      { value: 'low', label: 'Low' },
+      { value: 'normal', label: 'Normal' },
+      { value: 'high', label: 'High' },
+      { value: 'urgent', label: 'Urgent' }
+    ]},
+    { name: 'message', label: 'Message Content', type: 'textarea', required: true, rows: 6, fullWidth: true },
+    { name: 'scheduleDelivery', label: 'Schedule for Later', type: 'checkbox' },
+    { name: 'deliveryDate', label: 'Delivery Date & Time', type: 'datetime-local' }
+  ];
+
+  const messageViewFields = [
+    { name: 'subject', label: 'Subject', type: 'text' },
+    { name: 'from', label: 'From', type: 'text' },
+    { name: 'to', label: 'Recipients', type: 'text' },
+    { name: 'date', label: 'Date Sent', type: 'date' },
+    { name: 'status', label: 'Status', type: 'status' },
+    { name: 'priority', label: 'Priority', type: 'status' }
+  ];
+
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high':
@@ -124,13 +205,19 @@ export default function Communications() {
           <p className="text-neutral-600 mt-1">Manage announcements, messages, and notifications</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
-            <DocumentArrowUpIcon className="w-4 h-4" />
-            Import Contacts
-          </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={() => setShowNewMessageModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             New Message
+          </button>
+          <button 
+            onClick={() => setShowImportContactsModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
+            <ArrowUpTrayIcon className="w-4 h-4" />
+            Import Contacts
           </button>
         </div>
       </div>
@@ -140,11 +227,11 @@ export default function Communications() {
         <div className="bg-white rounded-xl shadow-card p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-lg flex items-center justify-center">
-              <SpeakerWaveIcon className="w-5 h-5 text-white" />
+              <ChatBubbleLeftRightIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-neutral-800">{announcements.length}</div>
-              <div className="text-sm text-neutral-500">Announcements</div>
+              <div className="text-2xl font-bold text-neutral-800">{messages.length}</div>
+              <div className="text-sm text-neutral-500">Messages</div>
             </div>
           </div>
         </div>
@@ -162,7 +249,7 @@ export default function Communications() {
         <div className="bg-white rounded-xl shadow-card p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-accent-purple to-accent-pink rounded-lg flex items-center justify-center">
-              <UsersIcon className="w-5 h-5 text-white" />
+              <UserGroupIcon className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="text-2xl font-bold text-neutral-800">1,847</div>
@@ -236,10 +323,25 @@ export default function Communications() {
                       <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(announcement.status)}`}>
                         {announcement.status}
                       </span>
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                      <button 
+                        onClick={() => handleViewMessage(announcement)}
+                        className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                        title="View"
+                      >
+                        <EyeIcon className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleEditMessage(announcement)}
+                        className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                        title="Edit"
+                      >
                         <PencilIcon className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Delete">
+                      <button 
+                        onClick={() => handleDeleteMessage(announcement)}
+                        className="p-2 text-status-error hover:bg-status-error/10 rounded-lg transition-colors" 
+                        title="Delete"
+                      >
                         <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
@@ -331,8 +433,7 @@ export default function Communications() {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Message Type</label>
                   <select
-                    value={messageType}
-                    onChange={(e) => setMessageType(e.target.value)}
+                    defaultValue="announcement"
                     className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
                   >
                     <option value="announcement">Announcement</option>
@@ -344,8 +445,7 @@ export default function Communications() {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Recipients</label>
                   <select
-                    value={selectedRecipients}
-                    onChange={(e) => setSelectedRecipients(e.target.value)}
+                    defaultValue="all_students"
                     className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
                   >
                     <option value="all">All Users</option>
@@ -400,6 +500,85 @@ export default function Communications() {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <FormModal
+        isOpen={showNewMessageModal}
+        onClose={() => setShowNewMessageModal(false)}
+        onSubmit={handleNewMessage}
+        title="New Message"
+        subtitle="Compose and send a message to recipients"
+        fields={newMessageFields}
+        submitText="Send Message"
+        mode="create"
+      />
+
+      <ImportModal
+        isOpen={showImportContactsModal}
+        onClose={() => setShowImportContactsModal(false)}
+        onImport={handleImportContacts}
+        title="Import Contacts"
+        subtitle="Upload a file to import contact information"
+        acceptedFormats={['.csv', '.xlsx', '.vcf']}
+        maxFileSize={5}
+        templateUrl="/templates/contacts-template.csv"
+        sampleData={[
+          'Name,Email,Phone,Group,Department',
+          'John Doe,john.doe@email.com,+1234567890,Students,Computer Science',
+          'Jane Smith,jane.smith@email.com,+0987654321,Faculty,Mathematics'
+        ]}
+      />
+
+      <ViewModal
+        isOpen={showViewMessageModal}
+        onClose={() => setShowViewMessageModal(false)}
+        title="Message Details"
+        subtitle="View complete message information and delivery status"
+        data={selectedMessage}
+        fields={messageViewFields}
+        actions={[
+          {
+            label: 'Edit Message',
+            onClick: () => {
+              setShowViewMessageModal(false);
+              handleEditMessage(selectedMessage);
+            },
+            className: 'bg-brand-primary hover:bg-brand-primary-dark text-white',
+            icon: PencilIcon
+          },
+          {
+            label: 'Resend',
+            onClick: () => {
+              setShowViewMessageModal(false);
+              console.log('Resend message:', selectedMessage?.id);
+            },
+            className: 'bg-accent-green hover:bg-accent-green-dark text-white',
+            icon: PaperAirplaneIcon
+          }
+        ]}
+      />
+
+      <FormModal
+        isOpen={showEditMessageModal}
+        onClose={() => setShowEditMessageModal(false)}
+        onSubmit={handleUpdateMessage}
+        title="Edit Message"
+        subtitle="Update message content and settings"
+        fields={newMessageFields}
+        initialData={selectedMessage}
+        submitText="Update Message"
+        mode="edit"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteMessageModal}
+        onClose={() => setShowDeleteMessageModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Message"
+        message={`Are you sure you want to permanently delete the message "${selectedMessage?.subject}"? This action cannot be undone.`}
+        confirmText="Delete Message"
+        type="danger"
+      />
     </div>
   );
 }

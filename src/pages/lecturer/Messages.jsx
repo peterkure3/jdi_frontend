@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import MessageComposeModal from '../../components/shared/MessageComposeModal';
+import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -12,7 +13,13 @@ import {
   TrashIcon,
   PaperClipIcon,
   FaceSmileIcon,
-  EnvelopeOpenIcon
+  EnvelopeOpenIcon,
+  EyeIcon,
+  PencilIcon,
+  UserGroupIcon,
+  BellIcon,
+  DocumentTextIcon,
+  TagIcon
 } from '@heroicons/react/24/outline';
 
 export default function Messages() {
@@ -21,7 +28,12 @@ export default function Messages() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
-
+  const [showMessageDetailsModal, setShowMessageDetailsModal] = useState(false);
+  const [showBulkMessageModal, setShowBulkMessageModal] = useState(false);
+  const [showAutoReplyModal, setShowAutoReplyModal] = useState(false);
+  const [showMessageTemplateModal, setShowMessageTemplateModal] = useState(false);
+  const [showArchiveConfirmModal, setShowArchiveConfirmModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const messages = [
     {
       id: 1,
@@ -108,6 +120,131 @@ export default function Messages() {
     }
   };
 
+  // Enhanced handler functions
+  const handleViewMessageDetails = (message) => {
+    setSelectedMessage(message);
+    setShowMessageDetailsModal(true);
+  };
+
+  const handleMarkAsRead = (message) => {
+    console.log('Marking message as read:', message.id);
+    // Update message read status
+  };
+
+  const handleMarkAsUnread = (message) => {
+    console.log('Marking message as unread:', message.id);
+    // Update message read status
+  };
+
+  const handleArchiveMessage = (message) => {
+    setSelectedMessage(message);
+    setShowArchiveConfirmModal(true);
+  };
+
+  const handleDeleteMessage = (message) => {
+    setSelectedMessage(message);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmArchive = async () => {
+    console.log('Archiving message:', selectedMessage?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setShowArchiveConfirmModal(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log('Deleting message:', selectedMessage?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setShowDeleteConfirmModal(false);
+  };
+
+  const handleBulkMessage = async (bulkData) => {
+    console.log('Sending bulk message:', bulkData);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setShowBulkMessageModal(false);
+  };
+
+  const handleSetupAutoReply = async (autoReplyData) => {
+    console.log('Setting up auto-reply:', autoReplyData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowAutoReplyModal(false);
+  };
+
+  const handleCreateTemplate = async (templateData) => {
+    console.log('Creating message template:', templateData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowMessageTemplateModal(false);
+  };
+
+
+  // Field definitions
+  const messageDetailsFields = [
+    { name: 'from', label: 'From', type: 'text' },
+    { name: 'email', label: 'Email', type: 'email' },
+    { name: 'subject', label: 'Subject', type: 'text' },
+    { name: 'timestamp', label: 'Received', type: 'datetime' },
+    { name: 'priority', label: 'Priority', type: 'status' },
+    { name: 'category', label: 'Category', type: 'text' },
+    { name: 'isRead', label: 'Read Status', type: 'boolean' },
+    { name: 'content', label: 'Message Content', type: 'text', fullWidth: true }
+  ];
+
+  const bulkMessageFields = [
+    { name: 'recipients', label: 'Recipients', type: 'select', required: true, multiple: true, options: [
+      { value: 'all_students', label: 'All Students' },
+      { value: 'cs101_students', label: 'CS101 Students' },
+      { value: 'math201_students', label: 'MATH201 Students' },
+      { value: 'phys101_students', label: 'PHYS101 Students' },
+      { value: 'custom', label: 'Custom Selection' }
+    ]},
+    { name: 'subject', label: 'Subject', type: 'text', required: true, fullWidth: true },
+    { name: 'priority', label: 'Priority', type: 'select', required: true, options: [
+      { value: 'low', label: 'Low' },
+      { value: 'normal', label: 'Normal' },
+      { value: 'high', label: 'High' },
+      { value: 'urgent', label: 'Urgent' }
+    ]},
+    { name: 'category', label: 'Category', type: 'select', required: true, options: [
+      { value: 'academic', label: 'Academic' },
+      { value: 'administrative', label: 'Administrative' },
+      { value: 'announcement', label: 'Announcement' },
+      { value: 'grades', label: 'Grades' }
+    ]},
+    { name: 'message', label: 'Message', type: 'textarea', rows: 8, required: true, fullWidth: true },
+    { name: 'attachments', label: 'Attachments', type: 'file', multiple: true },
+    { name: 'schedule_send', label: 'Schedule for later', type: 'checkbox' },
+    { name: 'send_time', label: 'Send Time', type: 'datetime' }
+  ];
+
+  const autoReplyFields = [
+    { name: 'enabled', label: 'Enable Auto-Reply', type: 'checkbox', required: true },
+    { name: 'subject_prefix', label: 'Subject Prefix', type: 'text', placeholder: 'Re: Auto-Reply' },
+    { name: 'message', label: 'Auto-Reply Message', type: 'textarea', rows: 6, required: true, fullWidth: true },
+    { name: 'trigger_keywords', label: 'Trigger Keywords (comma-separated)', type: 'text', fullWidth: true },
+    { name: 'exclude_categories', label: 'Exclude Categories', type: 'select', multiple: true, options: [
+      { value: 'urgent', label: 'Urgent Messages' },
+      { value: 'grades', label: 'Grade Inquiries' },
+      { value: 'administrative', label: 'Administrative' }
+    ]},
+    { name: 'active_hours_only', label: 'Only during office hours', type: 'checkbox' },
+    { name: 'max_replies_per_day', label: 'Max Auto-Replies per Day', type: 'number', min: '1', max: '50' }
+  ];
+
+  const templateFields = [
+    { name: 'name', label: 'Template Name', type: 'text', required: true },
+    { name: 'category', label: 'Category', type: 'select', required: true, options: [
+      { value: 'assignment_feedback', label: 'Assignment Feedback' },
+      { value: 'grade_explanation', label: 'Grade Explanation' },
+      { value: 'office_hours', label: 'Office Hours' },
+      { value: 'general_inquiry', label: 'General Inquiry' },
+      { value: 'extension_response', label: 'Extension Response' }
+    ]},
+    { name: 'subject', label: 'Subject Template', type: 'text', required: true, fullWidth: true },
+    { name: 'content', label: 'Message Template', type: 'textarea', rows: 8, required: true, fullWidth: true },
+    { name: 'variables', label: 'Available Variables', type: 'text', placeholder: '{{student_name}}, {{course_name}}, {{assignment_name}}', fullWidth: true },
+    { name: 'is_default', label: 'Set as default for this category', type: 'checkbox' }
+  ];
+
   return (
     <div className="h-full flex bg-white rounded-xl shadow-card overflow-hidden">
       {/* Messages List */}
@@ -116,13 +253,36 @@ export default function Messages() {
         <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-neutral-800">Messages</h1>
-            <button 
-              onClick={() => setIsComposeModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg hover:shadow-lg transition-all"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Compose
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setIsComposeModalOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg hover:shadow-lg transition-all"
+              >
+                <PlusIcon className="w-4 h-4" />
+                Compose
+              </button>
+              <button 
+                onClick={() => setShowBulkMessageModal(true)}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-accent-purple hover:bg-accent-purple/90 text-white rounded-lg hover:shadow-lg transition-all"
+                title="Bulk Message"
+              >
+                <UserGroupIcon className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setShowAutoReplyModal(true)}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-accent-cyan hover:bg-accent-cyan/90 text-white rounded-lg hover:shadow-lg transition-all"
+                title="Auto-Reply Settings"
+              >
+                <BellIcon className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setShowMessageTemplateModal(true)}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-status-success hover:bg-status-success/90 text-white rounded-lg hover:shadow-lg transition-all"
+                title="Message Templates"
+              >
+                <DocumentTextIcon className="w-4 h-4" />
+              </button>
+            </div>
           </div>
           
           {/* Search */}
@@ -232,13 +392,32 @@ export default function Messages() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Mark as Unread">
+                  <button 
+                    onClick={() => handleViewMessageDetails(selectedMessage)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                    title="View Details"
+                  >
+                    <EyeIcon className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => selectedMessage.isRead ? handleMarkAsUnread(selectedMessage) : handleMarkAsRead(selectedMessage)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                    title={selectedMessage.isRead ? "Mark as Unread" : "Mark as Read"}
+                  >
                     <EnvelopeIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Archive">
+                  <button 
+                    onClick={() => handleArchiveMessage(selectedMessage)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                    title="Archive"
+                  >
                     <ArchiveBoxIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                  <button 
+                    onClick={() => handleDeleteMessage(selectedMessage)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                    title="Delete"
+                  >
                     <TrashIcon className="w-4 h-4" />
                   </button>
                 </div>
@@ -313,6 +492,93 @@ export default function Messages() {
         isOpen={isComposeModalOpen}
         onClose={() => setIsComposeModalOpen(false)}
         userType="lecturer"
+      />
+
+      {/* Enhanced Modals */}
+      <ViewModal
+        isOpen={showMessageDetailsModal}
+        onClose={() => setShowMessageDetailsModal(false)}
+        title="Message Details"
+        subtitle="Complete message information and metadata"
+        data={{
+          ...selectedMessage,
+          timestamp: selectedMessage ? new Date(selectedMessage.timestamp).toLocaleString() : '',
+          isRead: selectedMessage?.isRead ? 'Read' : 'Unread'
+        }}
+        fields={messageDetailsFields}
+        actions={[
+          {
+            label: 'Archive',
+            onClick: () => {
+              setShowMessageDetailsModal(false);
+              handleArchiveMessage(selectedMessage);
+            },
+            variant: 'secondary'
+          },
+          {
+            label: 'Reply',
+            onClick: () => {
+              setShowMessageDetailsModal(false);
+              // Focus on reply textarea
+            },
+            variant: 'primary'
+          }
+        ]}
+      />
+
+      <FormModal
+        isOpen={showBulkMessageModal}
+        onClose={() => setShowBulkMessageModal(false)}
+        onSubmit={handleBulkMessage}
+        title="Send Bulk Message"
+        subtitle="Send a message to multiple students at once"
+        fields={bulkMessageFields}
+        submitText="Send to All Recipients"
+        mode="create"
+      />
+
+      <FormModal
+        isOpen={showAutoReplyModal}
+        onClose={() => setShowAutoReplyModal(false)}
+        onSubmit={handleSetupAutoReply}
+        title="Auto-Reply Settings"
+        subtitle="Configure automatic responses to student messages"
+        fields={autoReplyFields}
+        submitText="Save Auto-Reply Settings"
+        mode="create"
+      />
+
+      <FormModal
+        isOpen={showMessageTemplateModal}
+        onClose={() => setShowMessageTemplateModal(false)}
+        onSubmit={handleCreateTemplate}
+        title="Create Message Template"
+        subtitle="Create reusable message templates for common responses"
+        fields={templateFields}
+        submitText="Create Template"
+        mode="create"
+      />
+
+      <ConfirmationModal
+        isOpen={showArchiveConfirmModal}
+        onClose={() => setShowArchiveConfirmModal(false)}
+        onConfirm={handleConfirmArchive}
+        title="Archive Message"
+        message={`Are you sure you want to archive the message "${selectedMessage?.subject}"? You can find archived messages in the Archive folder.`}
+        confirmText="Archive"
+        cancelText="Cancel"
+        type="info"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirmModal}
+        onClose={() => setShowDeleteConfirmModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Message"
+        message={`Are you sure you want to permanently delete the message "${selectedMessage?.subject}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
       />
     </div>
   );

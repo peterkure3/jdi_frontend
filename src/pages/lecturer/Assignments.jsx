@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   PlusIcon,
   QueueListIcon,
@@ -24,6 +25,10 @@ import {
 export default function Assignments() {
   const [activeTab, setActiveTab] = useState('active');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
 
   const assignments = {
     active: [
@@ -111,6 +116,94 @@ export default function Assignments() {
   };
 
   const currentAssignments = assignments[activeTab] || [];
+
+  // Handler functions
+  const handleCreateAssignment = async (assignmentData) => {
+    console.log('Creating assignment:', assignmentData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowCreateModal(false);
+  };
+
+  const handleEditAssignment = async (assignmentData) => {
+    console.log('Editing assignment:', selectedAssignment?.id, assignmentData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowEditModal(false);
+  };
+
+  const handleViewAssignment = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowViewModal(true);
+  };
+
+  const handleEditClick = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowEditModal(true);
+  };
+
+  const handleDuplicateAssignment = async (assignment) => {
+    console.log('Duplicating assignment:', assignment.id);
+    setSelectedAssignment({...assignment, title: assignment.title + ' (Copy)'});
+    setShowCreateModal(true);
+  };
+
+  const handleDeleteClick = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log('Deleting assignment:', selectedAssignment?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setShowDeleteModal(false);
+  };
+
+  const handlePublishAssignment = async (assignment) => {
+    console.log('Publishing assignment:', assignment.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleViewSubmissions = (assignment) => {
+    console.log('Viewing submissions for:', assignment.id);
+    // Navigate to submissions page or open submissions modal
+  };
+
+  const handleGradeAssignment = (assignment) => {
+    console.log('Grading assignment:', assignment.id);
+    // Navigate to grading interface
+  };
+
+  // Field definitions
+  const assignmentFields = [
+    { name: 'title', label: 'Assignment Title', type: 'text', required: true, fullWidth: true },
+    { name: 'course', label: 'Course', type: 'select', required: true, options: [
+      { value: 'cs101', label: 'Computer Science 101' },
+      { value: 'ds201', label: 'Data Structures' },
+      { value: 'db301', label: 'Database Systems' },
+      { value: 'se401', label: 'Software Engineering' }
+    ]},
+    { name: 'type', label: 'Assignment Type', type: 'select', required: true, options: [
+      { value: 'assignment', label: 'Assignment' },
+      { value: 'quiz', label: 'Quiz' },
+      { value: 'project', label: 'Project' },
+      { value: 'exam', label: 'Exam' }
+    ]},
+    { name: 'points', label: 'Total Points', type: 'number', required: true },
+    { name: 'dueDate', label: 'Due Date', type: 'datetime-local', required: true },
+    { name: 'description', label: 'Description', type: 'textarea', required: true, rows: 4, fullWidth: true },
+    { name: 'allowLateSubmissions', label: 'Allow Late Submissions', type: 'checkbox' },
+    { name: 'requireFileUpload', label: 'Require File Upload', type: 'checkbox' }
+  ];
+
+  const assignmentViewFields = [
+    { name: 'title', label: 'Title', type: 'text' },
+    { name: 'course', label: 'Course', type: 'text' },
+    { name: 'type', label: 'Type', type: 'text' },
+    { name: 'points', label: 'Points', type: 'text' },
+    { name: 'dueDate', label: 'Due Date', type: 'date' },
+    { name: 'status', label: 'Status', type: 'status' },
+    { name: 'submissions', label: 'Submissions', type: 'text' },
+    { name: 'description', label: 'Description', type: 'text', fullWidth: true }
+  ];
 
   return (
     <div className="space-y-6">
@@ -248,16 +341,32 @@ export default function Assignments() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Details">
+                    <button 
+                      onClick={() => handleViewAssignment(assignment)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="View Details"
+                    >
                       <EyeIcon className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                    <button 
+                      onClick={() => handleEditClick(assignment)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="Edit"
+                    >
                       <PencilIcon className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Duplicate">
+                    <button 
+                      onClick={() => handleDuplicateAssignment(assignment)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                      title="Duplicate"
+                    >
                       <DocumentDuplicateIcon className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                    <button 
+                      onClick={() => handleDeleteClick(assignment)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                      title="Delete"
+                    >
                       <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
@@ -282,23 +391,35 @@ export default function Assignments() {
                   
                   {assignment.status === 'active' && (
                     <div className="flex items-center gap-2">
-                      <button className="bg-brand-primary hover:bg-brand-primary-dark text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                      <button 
+                        onClick={() => handleViewSubmissions(assignment)}
+                        className="bg-brand-primary hover:bg-brand-primary-dark text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all"
+                      >
                         View Submissions
                       </button>
-                      <button className="bg-white border border-neutral-200 text-neutral-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors">
+                      <button 
+                        onClick={() => handleGradeAssignment(assignment)}
+                        className="bg-white border border-neutral-200 text-neutral-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors"
+                      >
                         Grade
                       </button>
                     </div>
                   )}
                   
                   {assignment.status === 'draft' && (
-                    <button className="bg-status-success text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-status-success/80 transition-colors">
+                    <button 
+                      onClick={() => handlePublishAssignment(assignment)}
+                      className="bg-status-success text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-status-success/80 transition-colors"
+                    >
                       Publish
                     </button>
                   )}
                   
                   {assignment.status === 'completed' && (
-                    <button className="bg-neutral-100 text-neutral-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors">
+                    <button 
+                      onClick={() => handleViewSubmissions(assignment)}
+                      className="bg-neutral-100 text-neutral-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors"
+                    >
                       View Results
                     </button>
                   )}
@@ -317,105 +438,50 @@ export default function Assignments() {
         </div>
       </div>
 
-      {/* Create Assignment Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-neutral-200">
-              <h3 className="text-lg font-semibold text-neutral-800">Create Assignment</h3>
-              <button 
-                onClick={() => setShowCreateModal(false)}
-                className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Assignment Title</label>
-                  <input
-                    type="text"
-                    placeholder="Enter assignment title..."
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Course</label>
-                  <select className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors">
-                    <option>Computer Science 101</option>
-                    <option>Data Structures</option>
-                    <option>Database Systems</option>
-                    <option>Software Engineering</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Type</label>
-                  <select className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors">
-                    <option value="assignment">Assignment</option>
-                    <option value="quiz">Quiz</option>
-                    <option value="project">Project</option>
-                    <option value="exam">Exam</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Points</label>
-                  <input
-                    type="number"
-                    placeholder="100"
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Due Date</label>
-                  <input
-                    type="date"
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">Description</label>
-                <textarea
-                  rows={4}
-                  placeholder="Provide detailed instructions for the assignment..."
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors resize-none"
-                />
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <label className="flex items-center">
-                  <input type="checkbox" className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20" />
-                  <span className="ml-2 text-sm text-neutral-700">Allow late submissions</span>
-                </label>
-                <label className="flex items-center">
-                  <input type="checkbox" className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20" />
-                  <span className="ml-2 text-sm text-neutral-700">Require file upload</span>
-                </label>
-              </div>
-              
-              <div className="flex items-center gap-3 pt-4">
-                <button className="bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all">
-                  Create Assignment
-                </button>
-                <button className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors">
-                  Save as Draft
-                </button>
-                <button 
-                  onClick={() => setShowCreateModal(false)}
-                  className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modals */}
+      <FormModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateAssignment}
+        title="Create Assignment"
+        subtitle="Create a new assignment for your students"
+        fields={assignmentFields}
+        initialData={selectedAssignment || {}}
+        submitText="Create Assignment"
+        mode="create"
+      />
+
+      <FormModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleEditAssignment}
+        title="Edit Assignment"
+        subtitle="Update assignment details"
+        fields={assignmentFields}
+        initialData={selectedAssignment || {}}
+        submitText="Update Assignment"
+        mode="edit"
+      />
+
+      <ViewModal
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title="Assignment Details"
+        subtitle="View assignment information"
+        data={selectedAssignment || {}}
+        fields={assignmentViewFields}
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Assignment"
+        message={`Are you sure you want to delete "${selectedAssignment?.title}"? This action cannot be undone.`}
+        confirmText="Delete Assignment"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

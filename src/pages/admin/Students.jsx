@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ImportModal, FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   ArrowUpTrayIcon,
   UserPlusIcon,
@@ -15,6 +16,13 @@ import {
 export default function Students() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const students = [
     { id: 1, name: 'Alice Johnson', email: 'alice.j@student.edu', course: 'Computer Science', year: '3rd Year', gpa: '3.8', status: 'active', enrolled: '2022-09-01' },
@@ -43,6 +51,84 @@ export default function Students() {
     }
   };
 
+  const handleImportStudents = async (file) => {
+    console.log('Importing students from file:', file.name);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  };
+
+  const handleAddStudent = async (studentData) => {
+    console.log('Adding new student:', studentData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleViewStudent = (student) => {
+    setSelectedStudent(student);
+    setShowViewModal(true);
+  };
+
+  const handleEditStudent = (student) => {
+    setSelectedStudent(student);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateStudent = async (studentData) => {
+    console.log('Updating student:', selectedStudent?.id, studentData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleSuspendStudent = (student) => {
+    setSelectedStudent(student);
+    setShowSuspendModal(true);
+  };
+
+  const handleConfirmSuspend = async () => {
+    console.log('Suspending student:', selectedStudent?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleDeleteStudent = (student) => {
+    setSelectedStudent(student);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log('Deleting student:', selectedStudent?.id);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const addStudentFields = [
+    { name: 'firstName', label: 'First Name', type: 'text', required: true },
+    { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+    { name: 'email', label: 'Email Address', type: 'email', required: true },
+    { name: 'studentId', label: 'Student ID', type: 'text', required: true },
+    { name: 'course', label: 'Course', type: 'select', required: true, options: [
+      { value: 'computer_science', label: 'Computer Science' },
+      { value: 'engineering', label: 'Engineering' },
+      { value: 'business', label: 'Business Administration' },
+      { value: 'mathematics', label: 'Mathematics' },
+      { value: 'physics', label: 'Physics' }
+    ]},
+    { name: 'year', label: 'Academic Year', type: 'select', required: true, options: [
+      { value: '1', label: '1st Year' },
+      { value: '2', label: '2nd Year' },
+      { value: '3', label: '3rd Year' },
+      { value: '4', label: '4th Year' }
+    ]},
+    { name: 'phone', label: 'Phone Number', type: 'text' },
+    { name: 'address', label: 'Address', type: 'textarea', rows: 2, fullWidth: true },
+    { name: 'emergencyContact', label: 'Emergency Contact', type: 'text', fullWidth: true }
+  ];
+
+  const studentViewFields = [
+    { name: 'name', label: 'Full Name', type: 'text' },
+    { name: 'email', label: 'Email Address', type: 'email' },
+    { name: 'course', label: 'Course', type: 'text' },
+    { name: 'year', label: 'Academic Year', type: 'text' },
+    { name: 'gpa', label: 'GPA', type: 'text' },
+    { name: 'status', label: 'Status', type: 'status' },
+    { name: 'enrolled', label: 'Enrollment Date', type: 'date' }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -52,11 +138,17 @@ export default function Students() {
           <p className="text-neutral-600 mt-1">Manage student records and information</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={() => setShowImportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowUpTrayIcon className="w-4 h-4" />
             Import
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={() => setShowAddStudentModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <UserPlusIcon className="w-4 h-4" />
             Add Student
           </button>
@@ -184,16 +276,32 @@ export default function Students() {
                   <td className="px-6 py-4 text-sm text-neutral-500">{student.enrolled}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Profile">
+                      <button 
+                        onClick={() => handleViewStudent(student)}
+                        className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                        title="View Profile"
+                      >
                         <EyeIcon className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                      <button 
+                        onClick={() => handleEditStudent(student)}
+                        className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                        title="Edit"
+                      >
                         <PencilIcon className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-status-warning hover:bg-status-warning/10 rounded-lg transition-colors" title="Suspend">
+                      <button 
+                        onClick={() => handleSuspendStudent(student)}
+                        className="p-2 text-status-warning hover:bg-status-warning/10 rounded-lg transition-colors" 
+                        title="Suspend"
+                      >
                         <PauseIcon className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-status-error hover:bg-status-error/10 rounded-lg transition-colors" title="Delete">
+                      <button 
+                        onClick={() => handleDeleteStudent(student)}
+                        className="p-2 text-status-error hover:bg-status-error/10 rounded-lg transition-colors" 
+                        title="Delete"
+                      >
                         <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
@@ -204,6 +312,86 @@ export default function Students() {
           </table>
         </div>
       </div>
+
+      {/* Modals */}
+      <ImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImportStudents}
+        title="Import Students"
+        subtitle="Upload a file to import student data"
+        acceptedFormats={['.csv', '.xlsx']}
+        maxFileSize={5}
+        templateUrl="/templates/students-template.csv"
+        sampleData={[
+          'First Name,Last Name,Email,Student ID,Course,Year',
+          'John,Doe,john.doe@email.com,STU001,Computer Science,1',
+          'Jane,Smith,jane.smith@email.com,STU002,Engineering,2'
+        ]}
+      />
+
+      <FormModal
+        isOpen={showAddStudentModal}
+        onClose={() => setShowAddStudentModal(false)}
+        onSubmit={handleAddStudent}
+        title="Add New Student"
+        subtitle="Register a new student in the system"
+        fields={addStudentFields}
+        submitText="Add Student"
+        mode="create"
+      />
+
+      <ViewModal
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title="Student Profile"
+        subtitle="View complete student information"
+        data={selectedStudent}
+        fields={studentViewFields}
+        actions={[
+          {
+            label: 'Edit Profile',
+            onClick: () => {
+              setShowViewModal(false);
+              handleEditStudent(selectedStudent);
+            },
+            className: 'bg-brand-primary hover:bg-brand-primary-dark text-white',
+            icon: PencilIcon
+          }
+        ]}
+      />
+
+      <FormModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleUpdateStudent}
+        title="Edit Student"
+        subtitle="Update student information"
+        fields={addStudentFields}
+        initialData={selectedStudent}
+        submitText="Update Student"
+        mode="edit"
+      />
+
+      <ConfirmationModal
+        isOpen={showSuspendModal}
+        onClose={() => setShowSuspendModal(false)}
+        onConfirm={handleConfirmSuspend}
+        title="Suspend Student"
+        message={`Are you sure you want to suspend ${selectedStudent?.name}? They will not be able to access the system until reactivated.`}
+        confirmText="Suspend Student"
+        type="warning"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Student"
+        message={`Are you sure you want to permanently delete ${selectedStudent?.name}? This action cannot be undone and will remove all associated data.`}
+        confirmText="Delete Student"
+        type="danger"
+      />
     </div>
   );
 }

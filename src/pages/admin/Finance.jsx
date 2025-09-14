@@ -1,22 +1,30 @@
 import { useState } from 'react';
+import { ExportModal, FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   ArrowDownTrayIcon,
-  PlusIcon,
   ArrowUpIcon,
   ArrowDownIcon,
   ArrowTrendingUpIcon,
-  WalletIcon,
-  AcademicCapIcon,
-  PlusCircleIcon,
-  UserIcon,
-  ComputerDesktopIcon,
-  BoltIcon,
-  MinusCircleIcon
+  PlusIcon,
+  DocumentTextIcon,
+  CurrencyDollarIcon,
+  ChartBarIcon,
+  CalendarIcon,
+  MagnifyingGlassIcon,
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  WalletIcon 
 } from '@heroicons/react/24/outline';
 
 export default function Finance() {
-  const [timeFilter, setTimeFilter] = useState('month');
-  
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
+  const [showCreateInvoiceModal, setShowCreateInvoiceModal] = useState(false);
+  const [showGenerateReportModal, setShowGenerateReportModal] = useState(false);
+  const [showManageBudgetModal, setShowManageBudgetModal] = useState(false);
+
   const transactions = [
     { id: 1, type: 'income', description: 'Tuition Payment - Alice Johnson', amount: 5000, date: '2025-01-08', category: 'tuition' },
     { id: 2, type: 'expense', description: 'Faculty Salary - Dr. Smith', amount: 8500, date: '2025-01-07', category: 'salary' },
@@ -39,6 +47,106 @@ export default function Finance() {
     }
   };
 
+  const handleExportReport = async (exportOptions) => {
+    console.log('Exporting financial report with options:', exportOptions);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  };
+
+  const handleAddTransaction = async (transactionData) => {
+    console.log('Adding new transaction:', transactionData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleCreateInvoice = async (invoiceData) => {
+    console.log('Creating new invoice:', invoiceData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleGenerateReport = async (reportData) => {
+    console.log('Generating financial report:', reportData);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  };
+
+  const handleManageBudget = async (budgetData) => {
+    console.log('Managing budget:', budgetData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+
+
+  const transactionFields = [
+    { name: 'type', label: 'Transaction Type', type: 'select', required: true, options: [
+      { value: 'income', label: 'Income' },
+      { value: 'expense', label: 'Expense' },
+      { value: 'transfer', label: 'Transfer' }
+    ]},
+    { name: 'amount', label: 'Amount', type: 'number', required: true, step: '0.01' },
+    { name: 'description', label: 'Description', type: 'text', required: true, fullWidth: true },
+    { name: 'category', label: 'Category', type: 'select', required: true, options: [
+      { value: 'tuition', label: 'Tuition Fees' },
+      { value: 'salaries', label: 'Staff Salaries' },
+      { value: 'utilities', label: 'Utilities' },
+      { value: 'supplies', label: 'Supplies' },
+      { value: 'maintenance', label: 'Maintenance' },
+      { value: 'other', label: 'Other' }
+    ]},
+    { name: 'date', label: 'Transaction Date', type: 'date', required: true },
+    { name: 'reference', label: 'Reference Number', type: 'text' }
+  ];
+
+  const invoiceFields = [
+    { name: 'studentId', label: 'Student ID', type: 'text', required: true },
+    { name: 'studentName', label: 'Student Name', type: 'text', required: true },
+    { name: 'invoiceType', label: 'Invoice Type', type: 'select', required: true, options: [
+      { value: 'tuition', label: 'Tuition Fee' },
+      { value: 'accommodation', label: 'Accommodation' },
+      { value: 'library', label: 'Library Fine' },
+      { value: 'lab', label: 'Lab Fee' },
+      { value: 'other', label: 'Other' }
+    ]},
+    { name: 'amount', label: 'Amount', type: 'number', required: true, step: '0.01' },
+    { name: 'dueDate', label: 'Due Date', type: 'date', required: true },
+    { name: 'description', label: 'Description', type: 'textarea', rows: 3, fullWidth: true }
+  ];
+
+  const reportFields = [
+    { name: 'reportType', label: 'Report Type', type: 'select', required: true, options: [
+      { value: 'income_statement', label: 'Income Statement' },
+      { value: 'balance_sheet', label: 'Balance Sheet' },
+      { value: 'cash_flow', label: 'Cash Flow Statement' },
+      { value: 'budget_analysis', label: 'Budget Analysis' },
+      { value: 'student_fees', label: 'Student Fees Report' }
+    ]},
+    { name: 'period', label: 'Period', type: 'select', required: true, options: [
+      { value: 'current_month', label: 'Current Month' },
+      { value: 'current_quarter', label: 'Current Quarter' },
+      { value: 'current_year', label: 'Current Year' },
+      { value: 'custom', label: 'Custom Range' }
+    ]},
+    { name: 'startDate', label: 'Start Date', type: 'date' },
+    { name: 'endDate', label: 'End Date', type: 'date' },
+    { name: 'includeComparisons', label: 'Include Previous Period Comparison', type: 'checkbox' }
+  ];
+
+  const budgetFields = [
+    { name: 'category', label: 'Budget Category', type: 'select', required: true, options: [
+      { value: 'salaries', label: 'Staff Salaries' },
+      { value: 'utilities', label: 'Utilities' },
+      { value: 'supplies', label: 'Supplies & Equipment' },
+      { value: 'maintenance', label: 'Maintenance' },
+      { value: 'marketing', label: 'Marketing' },
+      { value: 'other', label: 'Other Expenses' }
+    ]},
+    { name: 'budgetAmount', label: 'Budget Amount', type: 'number', required: true, step: '0.01' },
+    { name: 'period', label: 'Budget Period', type: 'select', required: true, options: [
+      { value: 'monthly', label: 'Monthly' },
+      { value: 'quarterly', label: 'Quarterly' },
+      { value: 'yearly', label: 'Yearly' }
+    ]},
+    { name: 'notes', label: 'Notes', type: 'textarea', rows: 2, fullWidth: true }
+  ];
+
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -48,13 +156,40 @@ export default function Finance() {
           <p className="text-neutral-600 mt-1">Financial overview and transaction management</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={() => setShowExportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
             Export Report
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={() => setShowAddTransactionModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             Add Transaction
+          </button>
+          <button 
+            onClick={() => setShowCreateInvoiceModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-purple hover:bg-accent-purple-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
+            <DocumentTextIcon className="w-4 h-4" />
+            Create Invoice
+          </button>
+          <button 
+            onClick={() => setShowGenerateReportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-orange hover:bg-accent-orange-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
+            <ChartBarIcon className="w-4 h-4" />
+            Generate Report
+          </button>
+          <button 
+            onClick={() => setShowManageBudgetModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
+            <CurrencyDollarIcon className="w-4 h-4" />
+            Manage Budget
           </button>
         </div>
       </div>
@@ -118,12 +253,21 @@ export default function Finance() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-neutral-800">Revenue vs Expenses</h3>
             <div className="flex gap-2">
+              <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Details">
+                <EyeIcon className="w-4 h-4" />
+              </button>
+              <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                <PencilIcon className="w-4 h-4" />
+              </button>
+              <button className="p-2 text-status-error hover:bg-status-error/10 rounded-lg transition-colors" title="Delete">
+                <TrashIcon className="w-4 h-4" />
+              </button>
               {['week', 'month', 'quarter', 'year'].map(period => (
                 <button
                   key={period}
-                  onClick={() => setTimeFilter(period)}
+                  onClick={() => setActiveTab(period)}
                   className={`px-3 py-1 rounded-lg text-sm font-medium transition-all capitalize ${
-                    timeFilter === period
+                    activeTab === period
                       ? 'bg-brand-primary text-white'
                       : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                   }`}
@@ -239,6 +383,61 @@ export default function Finance() {
           </button>
         </div>
       </div>
+
+      {/* Modals */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExportReport}
+        title="Export Financial Report"
+        subtitle="Export financial data in your preferred format"
+        entityName="financial records"
+      />
+
+      <FormModal
+        isOpen={showAddTransactionModal}
+        onClose={() => setShowAddTransactionModal(false)}
+        onSubmit={handleAddTransaction}
+        title="Add New Transaction"
+        subtitle="Record a new financial transaction"
+        fields={transactionFields}
+        submitText="Add Transaction"
+        mode="create"
+      />
+
+      <FormModal
+        isOpen={showCreateInvoiceModal}
+        onClose={() => setShowCreateInvoiceModal(false)}
+        onSubmit={handleCreateInvoice}
+        title="Create Invoice"
+        subtitle="Generate a new invoice for a student"
+        fields={invoiceFields}
+        submitText="Create Invoice"
+        mode="create"
+      />
+
+      <FormModal
+        isOpen={showGenerateReportModal}
+        onClose={() => setShowGenerateReportModal(false)}
+        onSubmit={handleGenerateReport}
+        title="Generate Financial Report"
+        subtitle="Create a comprehensive financial report"
+        fields={reportFields}
+        submitText="Generate Report"
+        mode="create"
+      />
+
+      <FormModal
+        isOpen={showManageBudgetModal}
+        onClose={() => setShowManageBudgetModal(false)}
+        onSubmit={handleManageBudget}
+        title="Manage Budget"
+        subtitle="Set or update budget allocations"
+        fields={budgetFields}
+        submitText="Update Budget"
+        mode="create"
+      />
+
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import { 
   ArrowDownTrayIcon,
   PrinterIcon,
@@ -6,11 +7,20 @@ import {
   TrophyIcon,
   BookOpenIcon,
   AcademicCapIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  EyeIcon,
+  DocumentTextIcon,
+  ExclamationCircleIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 export default function Grades() {
   const [semesterFilter, setSemesterFilter] = useState('current');
+  const [showGradeBreakdownModal, setShowGradeBreakdownModal] = useState(false);
+  const [showGradeDisputeModal, setShowGradeDisputeModal] = useState(false);
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [showContactInstructorModal, setShowContactInstructorModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const grades = [
     { id: 1, course: 'Computer Science 101', code: 'CS101', grade: 'B+', points: 87, credits: 4, semester: 'Fall 2024', assignments: [
@@ -75,6 +85,106 @@ export default function Grades() {
     return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '0.00';
   };
 
+  // Handler functions
+  const handleViewGradeBreakdown = (course) => {
+    setSelectedCourse(course);
+    setShowGradeBreakdownModal(true);
+  };
+
+  const handleDownloadTranscript = () => {
+    console.log('Downloading transcript for period:', semesterFilter);
+    // Generate and download PDF transcript
+  };
+
+  const handlePrintTranscript = () => {
+    console.log('Printing transcript for period:', semesterFilter);
+    // Open print dialog
+  };
+
+  const handleGradeDispute = async (disputeData) => {
+    console.log('Submitting grade dispute for course:', selectedCourse?.id, disputeData);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setShowGradeDisputeModal(false);
+  };
+
+  const handleViewProgress = (course) => {
+    setSelectedCourse(course);
+    setShowProgressModal(true);
+  };
+
+  const handleContactInstructor = async (contactData) => {
+    console.log('Contacting instructor for course:', selectedCourse?.id, contactData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowContactInstructorModal(false);
+  };
+
+  const handleRequestGradeReport = () => {
+    console.log('Requesting detailed grade report');
+    // Request comprehensive grade analysis
+  };
+
+  // Field definitions
+  const gradeBreakdownFields = [
+    { name: 'course', label: 'Course', type: 'text' },
+    { name: 'code', label: 'Course Code', type: 'text' },
+    { name: 'instructor', label: 'Instructor', type: 'text' },
+    { name: 'semester', label: 'Semester', type: 'text' },
+    { name: 'credits', label: 'Credits', type: 'text' },
+    { name: 'grade', label: 'Final Grade', type: 'text' },
+    { name: 'points', label: 'Percentage', type: 'text' },
+    { name: 'gpa_contribution', label: 'GPA Contribution', type: 'text' }
+  ];
+
+  const disputeFields = [
+    { name: 'assignment', label: 'Assignment/Exam', type: 'select', required: true, options: [
+      { value: 'assignment1', label: 'Assignment 1' },
+      { value: 'midterm', label: 'Midterm Exam' },
+      { value: 'final', label: 'Final Project' },
+      { value: 'participation', label: 'Participation' },
+      { value: 'final_grade', label: 'Final Grade' }
+    ]},
+    { name: 'current_grade', label: 'Current Grade', type: 'text', required: true },
+    { name: 'expected_grade', label: 'Expected Grade', type: 'text', required: true },
+    { name: 'reason', label: 'Reason for Dispute', type: 'select', required: true, options: [
+      { value: 'calculation_error', label: 'Calculation Error' },
+      { value: 'missing_work', label: 'Missing Work Not Recorded' },
+      { value: 'grading_criteria', label: 'Grading Criteria Disagreement' },
+      { value: 'technical_issue', label: 'Technical Issue' },
+      { value: 'other', label: 'Other' }
+    ]},
+    { name: 'explanation', label: 'Detailed Explanation', type: 'textarea', rows: 4, required: true, fullWidth: true },
+    { name: 'evidence', label: 'Supporting Evidence', type: 'file', multiple: true }
+  ];
+
+  const progressFields = [
+    { name: 'course', label: 'Course', type: 'text' },
+    { name: 'current_grade', label: 'Current Grade', type: 'text' },
+    { name: 'assignments_completed', label: 'Assignments Completed', type: 'text' },
+    { name: 'assignments_remaining', label: 'Assignments Remaining', type: 'text' },
+    { name: 'attendance', label: 'Attendance Rate', type: 'text' },
+    { name: 'participation', label: 'Participation Score', type: 'text' },
+    { name: 'projected_grade', label: 'Projected Final Grade', type: 'text' },
+    { name: 'improvement_areas', label: 'Areas for Improvement', type: 'text', fullWidth: true }
+  ];
+
+  const contactInstructorFields = [
+    { name: 'subject', label: 'Subject', type: 'select', required: true, options: [
+      { value: 'grade_inquiry', label: 'Grade Inquiry' },
+      { value: 'assignment_help', label: 'Assignment Help' },
+      { value: 'office_hours', label: 'Office Hours Request' },
+      { value: 'extra_credit', label: 'Extra Credit Opportunity' },
+      { value: 'other', label: 'Other' }
+    ]},
+    { name: 'priority', label: 'Priority', type: 'select', required: true, options: [
+      { value: 'low', label: 'Low' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'high', label: 'High' },
+      { value: 'urgent', label: 'Urgent' }
+    ]},
+    { name: 'message', label: 'Message', type: 'textarea', rows: 5, required: true, fullWidth: true },
+    { name: 'request_meeting', label: 'Request in-person meeting', type: 'checkbox' }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -84,11 +194,17 @@ export default function Grades() {
           <p className="text-neutral-600 mt-1">Track your academic performance and progress</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={handleDownloadTranscript}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
             Download Transcript
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={handlePrintTranscript}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PrinterIcon className="w-4 h-4" />
             Print Transcript
           </button>
@@ -196,9 +312,32 @@ export default function Grades() {
                   </td>
                   <td className="px-6 py-4 text-sm text-neutral-600">{grade.semester}</td>
                   <td className="px-6 py-4">
-                    <button className="text-brand-primary hover:text-brand-primaryDark text-sm transition-colors">
-                      View Breakdown
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleViewGradeBreakdown(grade)}
+                        className="text-brand-primary hover:text-brand-primary-dark text-sm transition-colors"
+                        title="View Grade Breakdown"
+                      >
+                        <EyeIcon className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleViewProgress(grade)}
+                        className="text-accent-purple hover:text-accent-purple/80 text-sm transition-colors"
+                        title="View Progress"
+                      >
+                        <ChartBarIcon className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedCourse(grade);
+                          setShowContactInstructorModal(true);
+                        }}
+                        className="text-accent-cyan hover:text-accent-cyan/80 text-sm transition-colors"
+                        title="Contact Instructor"
+                      >
+                        <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -237,7 +376,16 @@ export default function Grades() {
 
       {/* Performance Chart Placeholder */}
       <div className="bg-white rounded-xl shadow-card p-6">
-        <h3 className="text-lg font-semibold text-neutral-800 mb-4">Performance Trend</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-neutral-800">Performance Trend</h3>
+          <button 
+            onClick={handleRequestGradeReport}
+            className="inline-flex items-center gap-2 px-3 py-2 bg-brand-primary/10 text-brand-primary rounded-lg hover:bg-brand-primary/20 transition-colors text-sm"
+          >
+            <DocumentTextIcon className="w-4 h-4" />
+            Request Detailed Report
+          </button>
+        </div>
         <div className="h-64 bg-neutral-50 rounded-lg flex items-center justify-center">
           <div className="text-center text-neutral-500">
             <ChartBarIcon className="w-16 h-16 mb-3" />
@@ -246,6 +394,86 @@ export default function Grades() {
           </div>
         </div>
       </div>
+      {/* Modals */}
+      <ViewModal
+        isOpen={showGradeBreakdownModal}
+        onClose={() => setShowGradeBreakdownModal(false)}
+        title="Grade Breakdown"
+        subtitle={`Detailed grade information for ${selectedCourse?.course || 'course'}`}
+        data={{
+          ...selectedCourse,
+          instructor: 'Dr. Smith',
+          gpa_contribution: selectedCourse ? (selectedCourse.credits * 4.0).toFixed(2) : '0.00'
+        }}
+        fields={gradeBreakdownFields}
+        actions={[
+          {
+            label: 'Dispute Grade',
+            onClick: () => {
+              setShowGradeBreakdownModal(false);
+              setShowGradeDisputeModal(true);
+            },
+            variant: 'secondary'
+          },
+          {
+            label: 'Contact Instructor',
+            onClick: () => {
+              setShowGradeBreakdownModal(false);
+              setShowContactInstructorModal(true);
+            },
+            variant: 'primary'
+          }
+        ]}
+      />
+
+      <FormModal
+        isOpen={showGradeDisputeModal}
+        onClose={() => setShowGradeDisputeModal(false)}
+        onSubmit={handleGradeDispute}
+        title="Grade Dispute"
+        subtitle={`Submit a grade dispute for ${selectedCourse?.course || 'course'}`}
+        fields={disputeFields}
+        submitText="Submit Dispute"
+        mode="create"
+      />
+
+      <ViewModal
+        isOpen={showProgressModal}
+        onClose={() => setShowProgressModal(false)}
+        title="Course Progress"
+        subtitle={`Progress tracking for ${selectedCourse?.course || 'course'}`}
+        data={{
+          ...selectedCourse,
+          assignments_completed: '8/12',
+          assignments_remaining: '4',
+          attendance: '95%',
+          participation: '92%',
+          projected_grade: 'B+',
+          improvement_areas: 'Focus on final project and exam preparation'
+        }}
+        fields={progressFields}
+        actions={[
+          {
+            label: 'Contact Instructor',
+            onClick: () => {
+              setShowProgressModal(false);
+              setShowContactInstructorModal(true);
+            },
+            variant: 'primary'
+          }
+        ]}
+      />
+
+      <FormModal
+        isOpen={showContactInstructorModal}
+        onClose={() => setShowContactInstructorModal(false)}
+        onSubmit={handleContactInstructor}
+        title="Contact Instructor"
+        subtitle={`Send a message to the instructor of ${selectedCourse?.course || 'course'}`}
+        fields={contactInstructorFields}
+        submitText="Send Message"
+        mode="create"
+      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportModal, FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   ArrowDownTrayIcon,
   UserPlusIcon,
@@ -12,12 +13,19 @@ import {
   PencilIcon,
   EnvelopeIcon,
   ClockIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
 
 export default function Lecturers() {
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showAddLecturerModal, setShowAddLecturerModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedLecturer, setSelectedLecturer] = useState(null);
 
   const lecturers = [
     { id: 1, name: 'Dr. Sarah Smith', email: 'sarah.smith@university.edu', department: 'Computer Science', courses: 4, students: 156, experience: '8 years', status: 'active' },
@@ -45,6 +53,89 @@ export default function Lecturers() {
     }
   };
 
+  const handleExportLecturers = async (exportOptions) => {
+    console.log('Exporting lecturers with options:', exportOptions);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  };
+
+  const handleAddLecturer = async (lecturerData) => {
+    console.log('Adding new lecturer:', lecturerData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleViewLecturer = (lecturer) => {
+    setSelectedLecturer(lecturer);
+    setShowViewModal(true);
+  };
+
+  const handleEditLecturer = (lecturer) => {
+    setSelectedLecturer(lecturer);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateLecturer = async (lecturerData) => {
+    console.log('Updating lecturer:', selectedLecturer?.id, lecturerData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  };
+
+  const handleMessageLecturer = (lecturer) => {
+    setSelectedLecturer(lecturer);
+    setShowMessageModal(true);
+  };
+
+  const handleSendMessage = async (messageData) => {
+    console.log('Sending message to lecturer:', selectedLecturer?.id, messageData);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const addLecturerFields = [
+    { name: 'firstName', label: 'First Name', type: 'text', required: true },
+    { name: 'lastName', label: 'Last Name', type: 'text', required: true },
+    { name: 'email', label: 'Email Address', type: 'email', required: true },
+    { name: 'employeeId', label: 'Employee ID', type: 'text', required: true },
+    { name: 'department', label: 'Department', type: 'select', required: true, options: [
+      { value: 'computer_science', label: 'Computer Science' },
+      { value: 'engineering', label: 'Engineering' },
+      { value: 'business', label: 'Business Administration' },
+      { value: 'mathematics', label: 'Mathematics' },
+      { value: 'physics', label: 'Physics' },
+      { value: 'chemistry', label: 'Chemistry' }
+    ]},
+    { name: 'position', label: 'Position', type: 'select', required: true, options: [
+      { value: 'professor', label: 'Professor' },
+      { value: 'associate_professor', label: 'Associate Professor' },
+      { value: 'assistant_professor', label: 'Assistant Professor' },
+      { value: 'lecturer', label: 'Lecturer' },
+      { value: 'adjunct', label: 'Adjunct Faculty' }
+    ]},
+    { name: 'phone', label: 'Phone Number', type: 'text' },
+    { name: 'office', label: 'Office Location', type: 'text' },
+    { name: 'specialization', label: 'Specialization', type: 'text', fullWidth: true },
+    { name: 'bio', label: 'Biography', type: 'textarea', rows: 3, fullWidth: true }
+  ];
+
+  const lecturerViewFields = [
+    { name: 'name', label: 'Full Name', type: 'text' },
+    { name: 'email', label: 'Email Address', type: 'email' },
+    { name: 'department', label: 'Department', type: 'text' },
+    { name: 'position', label: 'Position', type: 'text' },
+    { name: 'courses', label: 'Courses Teaching', type: 'text' },
+    { name: 'experience', label: 'Experience', type: 'text' },
+    { name: 'office', label: 'Office Location', type: 'text' },
+    { name: 'phone', label: 'Phone Number', type: 'text' }
+  ];
+
+  const messageFields = [
+    { name: 'subject', label: 'Subject', type: 'text', required: true, fullWidth: true },
+    { name: 'message', label: 'Message', type: 'textarea', required: true, rows: 5, fullWidth: true },
+    { name: 'priority', label: 'Priority', type: 'select', required: true, options: [
+      { value: 'low', label: 'Low' },
+      { value: 'normal', label: 'Normal' },
+      { value: 'high', label: 'High' },
+      { value: 'urgent', label: 'Urgent' }
+    ]}
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -54,11 +145,17 @@ export default function Lecturers() {
           <p className="text-neutral-600 mt-1">Manage faculty and teaching staff</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button 
+            onClick={() => setShowExportModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
             Export
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button 
+            onClick={() => setShowAddLecturerModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <UserPlusIcon className="w-4 h-4" />
             Add Lecturer
           </button>
@@ -193,14 +290,26 @@ export default function Lecturers() {
               <div className="flex items-center justify-between">
                 <div className="text-xs text-neutral-500">{lecturer.email}</div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Profile">
+                  <button 
+                    onClick={() => handleViewLecturer(lecturer)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                    title="View Profile"
+                  >
                     <EyeIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                  <button 
+                    onClick={() => handleEditLecturer(lecturer)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" 
+                    title="Edit"
+                  >
                     <PencilIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Message">
-                    <EnvelopeIcon className="w-4 h-4" />
+                  <button 
+                    onClick={() => handleMessageLecturer(lecturer)}
+                    className="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors" 
+                    title="Message"
+                  >
+                    <ChatBubbleLeftIcon className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -208,6 +317,79 @@ export default function Lecturers() {
           </div>
         ))}
       </div>
+
+      {/* Modals */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExportLecturers}
+        title="Export Lecturers"
+        subtitle="Export lecturer data in your preferred format"
+        entityName="lecturers"
+      />
+
+      <FormModal
+        isOpen={showAddLecturerModal}
+        onClose={() => setShowAddLecturerModal(false)}
+        onSubmit={handleAddLecturer}
+        title="Add New Lecturer"
+        subtitle="Register a new lecturer in the system"
+        fields={addLecturerFields}
+        submitText="Add Lecturer"
+        mode="create"
+      />
+
+      <ViewModal
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title="Lecturer Profile"
+        subtitle="View complete lecturer information"
+        data={selectedLecturer}
+        fields={lecturerViewFields}
+        actions={[
+          {
+            label: 'Edit Profile',
+            onClick: () => {
+              setShowViewModal(false);
+              handleEditLecturer(selectedLecturer);
+            },
+            className: 'bg-brand-primary hover:bg-brand-primary-dark text-white',
+            icon: PencilIcon
+          },
+          {
+            label: 'Send Message',
+            onClick: () => {
+              setShowViewModal(false);
+              handleMessageLecturer(selectedLecturer);
+            },
+            className: 'bg-neutral-600 hover:bg-neutral-700 text-white',
+            icon: ChatBubbleLeftIcon
+          }
+        ]}
+      />
+
+      <FormModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleUpdateLecturer}
+        title="Edit Lecturer"
+        subtitle="Update lecturer information"
+        fields={addLecturerFields}
+        initialData={selectedLecturer}
+        submitText="Update Lecturer"
+        mode="edit"
+      />
+
+      <FormModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        onSubmit={handleSendMessage}
+        title={`Send Message to ${selectedLecturer?.name}`}
+        subtitle="Compose and send a message"
+        fields={messageFields}
+        submitText="Send Message"
+        mode="create"
+      />
     </div>
   );
 }
