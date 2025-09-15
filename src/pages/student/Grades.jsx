@@ -23,33 +23,34 @@ export default function Grades() {
   const [selectedCourse, setSelectedCourse] = useState(null);
 
   const grades = [
-    { id: 1, course: 'Computer Science 101', code: 'CS101', grade: 'B+', points: 87, credits: 4, semester: 'Fall 2024', assignments: [
-      { name: 'Assignment 1', grade: 'A', points: 95, weight: 20 },
-      { name: 'Midterm Exam', grade: 'B+', points: 88, weight: 30 },
-      { name: 'Final Project', grade: 'B', points: 85, weight: 40 },
-      { name: 'Participation', grade: 'A-', points: 92, weight: 10 }
+    { id: 1, course: '3D Architectural Design', code: 'ARCH301', grade: 'B+', points: 87, credits: 4, semester: 'Fall 2024', assignments: [
+      { name: 'Design Project 1', grade: 'A', points: 95, weight: 25 },
+      { name: 'Midterm Portfolio', grade: 'B+', points: 88, weight: 30 },
+      { name: 'Final 3D Model', grade: 'B', points: 85, weight: 35 },
+      { name: 'Presentation', grade: 'A-', points: 92, weight: 10 }
     ]},
-    { id: 2, course: 'Mathematics for CS', code: 'MATH201', grade: 'A', points: 94, credits: 3, semester: 'Fall 2024', assignments: [
-      { name: 'Quiz 1', grade: 'A', points: 96, weight: 15 },
-      { name: 'Quiz 2', grade: 'A-', points: 92, weight: 15 },
-      { name: 'Midterm', grade: 'A', points: 95, weight: 35 },
-      { name: 'Final Exam', grade: 'A', points: 94, weight: 35 }
+    { id: 2, course: 'Interior Design', code: 'INTR201', grade: 'A', points: 94, credits: 3, semester: 'Fall 2024', assignments: [
+      { name: 'Color Theory Quiz', grade: 'A', points: 96, weight: 15 },
+      { name: 'Space Planning Project', grade: 'A-', points: 92, weight: 25 },
+      { name: 'Midterm Design', grade: 'A', points: 95, weight: 30 },
+      { name: 'Final Room Design', grade: 'A', points: 94, weight: 30 }
     ]},
-    { id: 3, course: 'Physics I', code: 'PHYS101', grade: 'B', points: 82, credits: 4, semester: 'Fall 2024', assignments: [
-      { name: 'Lab Reports', grade: 'B+', points: 88, weight: 25 },
-      { name: 'Midterm 1', grade: 'B-', points: 80, weight: 25 },
-      { name: 'Midterm 2', grade: 'B', points: 83, weight: 25 },
-      { name: 'Final Exam', grade: 'B', points: 81, weight: 25 }
+    { id: 3, course: 'Landscape Design', code: 'LAND101', grade: 'B', points: 82, credits: 3, semester: 'Fall 2024', assignments: [
+      { name: 'Site Analysis', grade: 'B+', points: 88, weight: 25 },
+      { name: 'Plant Selection Quiz', grade: 'B-', points: 80, weight: 20 },
+      { name: 'Design Proposal', grade: 'B', points: 83, weight: 30 },
+      { name: 'Final Landscape Plan', grade: 'B', points: 81, weight: 25 }
     ]},
-    { id: 4, course: 'English Literature', code: 'ENG201', grade: 'A-', points: 91, credits: 3, semester: 'Fall 2024', assignments: [
-      { name: 'Essay 1', grade: 'A', points: 95, weight: 30 },
-      { name: 'Essay 2', grade: 'A-', points: 90, weight: 30 },
-      { name: 'Final Paper', grade: 'A-', points: 89, weight: 40 }
+    { id: 4, course: 'Graphics Design', code: 'GRPH201', grade: 'A-', points: 91, credits: 3, semester: 'Fall 2024', assignments: [
+      { name: 'Logo Design', grade: 'A', points: 95, weight: 30 },
+      { name: 'Typography Project', grade: 'A-', points: 90, weight: 30 },
+      { name: 'Brand Identity Package', grade: 'A-', points: 89, weight: 40 }
     ]},
-    { id: 5, course: 'Data Structures', code: 'CS201', grade: 'A+', points: 98, credits: 4, semester: 'Spring 2024', assignments: [
-      { name: 'Programming Assignments', grade: 'A+', points: 99, weight: 50 },
-      { name: 'Midterm Exam', grade: 'A', points: 96, weight: 25 },
-      { name: 'Final Exam', grade: 'A+', points: 98, weight: 25 }
+    { id: 5, course: 'Structural Design', code: 'STRU301', grade: 'A+', points: 98, credits: 4, semester: 'Spring 2024', assignments: [
+      { name: 'Load Analysis Project', grade: 'A+', points: 100, weight: 25 },
+      { name: 'Beam Design Assignment', grade: 'A', points: 96, weight: 25 },
+      { name: 'Midterm Exam', grade: 'A+', points: 98, weight: 25 },
+      { name: 'Final Structural Plan', grade: 'A+', points: 99, weight: 25 }
     ]}
   ];
 

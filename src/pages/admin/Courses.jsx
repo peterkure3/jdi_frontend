@@ -44,81 +44,94 @@ export default function Courses() {
   const courses = [
     { 
       id: 1, 
-      code: 'CS101', 
-      name: 'Introduction to Computer Science', 
-      department: 'Computer Science',
-      lecturer: 'Dr. Sarah Smith',
+      code: 'ARCH301', 
+      name: '3D Architectural Design', 
+      department: 'Architecture & Design',
+      lecturer: 'Prof. Maria Rodriguez',
       credits: 4,
-      capacity: 50,
-      enrolled: 45,
+      capacity: 25,
+      enrolled: 22,
       status: 'active',
       semester: 'Fall 2024',
-      schedule: 'Mon/Wed 9:00-10:30'
+      schedule: 'Mon/Wed 9:00-12:00'
     },
     { 
       id: 2, 
-      code: 'MATH201', 
-      name: 'Calculus II', 
-      department: 'Mathematics',
-      lecturer: 'Prof. Michael Johnson',
+      code: 'INTR201', 
+      name: 'Interior Design', 
+      department: 'Architecture & Design',
+      lecturer: 'Dr. James Chen',
       credits: 3,
-      capacity: 40,
-      enrolled: 38,
+      capacity: 30,
+      enrolled: 28,
       status: 'active',
       semester: 'Fall 2024',
-      schedule: 'Tue/Thu 11:00-12:30'
+      schedule: 'Tue/Thu 10:00-12:30'
     },
     { 
       id: 3, 
-      code: 'ENG101', 
-      name: 'English Literature', 
-      department: 'English',
-      lecturer: 'Dr. Emily Brown',
+      code: 'LAND101', 
+      name: 'Landscape Design', 
+      department: 'Architecture & Design',
+      lecturer: 'Prof. Sarah Green',
+      credits: 3,
+      capacity: 20,
+      enrolled: 18,
+      status: 'active',
+      semester: 'Fall 2024',
+      schedule: 'Mon/Wed/Fri 2:00-3:30'
+    },
+    { 
+      id: 4, 
+      code: 'GRPH201', 
+      name: 'Graphics Design', 
+      department: 'Digital Design',
+      lecturer: 'Dr. Alex Thompson',
       credits: 3,
       capacity: 35,
       enrolled: 32,
       status: 'active',
       semester: 'Fall 2024',
-      schedule: 'Mon/Wed/Fri 2:00-3:00'
-    },
-    { 
-      id: 4, 
-      code: 'PHYS201', 
-      name: 'Physics II', 
-      department: 'Physics',
-      lecturer: 'Prof. David Wilson',
-      credits: 4,
-      capacity: 30,
-      enrolled: 28,
-      status: 'active',
-      semester: 'Fall 2024',
-      schedule: 'Tue/Thu 1:00-2:30'
+      schedule: 'Tue/Thu 1:00-3:30'
     },
     { 
       id: 5, 
-      code: 'CS301', 
-      name: 'Web Development', 
-      department: 'Computer Science',
-      lecturer: 'Dr. Sarah Smith',
-      credits: 3,
-      capacity: 25,
-      enrolled: 23,
-      status: 'draft',
-      semester: 'Spring 2025',
-      schedule: 'Wed/Fri 3:00-4:30'
+      code: 'STRU301', 
+      name: 'Structural Design', 
+      department: 'Engineering Design',
+      lecturer: 'Prof. Robert Kim',
+      credits: 4,
+      capacity: 20,
+      enrolled: 19,
+      status: 'active',
+      semester: 'Fall 2024',
+      schedule: 'Wed/Fri 9:00-12:00'
     },
     { 
       id: 6, 
-      code: 'BUS101', 
-      name: 'Business Administration', 
-      department: 'Business',
-      lecturer: 'Prof. Lisa Anderson',
+      code: 'ELEC201', 
+      name: 'Electrical & Wiring Design', 
+      department: 'Engineering Design',
+      lecturer: 'Dr. Lisa Wang',
       credits: 3,
-      capacity: 60,
-      enrolled: 0,
-      status: 'archived',
-      semester: 'Summer 2024',
-      schedule: 'Mon-Fri 10:00-11:00'
+      capacity: 25,
+      enrolled: 23,
+      status: 'active',
+      semester: 'Fall 2024',
+      schedule: 'Mon/Wed 1:00-3:30'
+    },
+    { 
+      id: 7, 
+      code: 'MECH301', 
+      name: 'Mechanical & Plumbing Design', 
+      department: 'Engineering Design',
+      lecturer: 'Prof. David Martinez',
+      credits: 4,
+      capacity: 20,
+      enrolled: 17,
+      status: 'draft',
+      semester: 'Spring 2025',
+      schedule: 'Tue/Thu 9:00-12:00'
     }
   ];
 
@@ -208,11 +221,9 @@ export default function Courses() {
 
   const getDepartmentColor = (department) => {
     const colors = {
-      'Computer Science': 'bg-blue-100 text-blue-700',
-      'Mathematics': 'bg-purple-100 text-purple-700',
-      'English': 'bg-pink-100 text-pink-700',
-      'Physics': 'bg-cyan-100 text-cyan-700',
-      'Business': 'bg-orange-100 text-orange-700'
+      'Architecture & Design': 'bg-blue-100 text-blue-700',
+      'Digital Design': 'bg-purple-100 text-purple-700',
+      'Engineering Design': 'bg-cyan-100 text-cyan-700'
     };
     return colors[department] || 'bg-gray-100 text-gray-700';
   };
@@ -313,7 +324,7 @@ export default function Courses() {
       <div className="bg-white rounded-xl shadow-card p-6">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="flex flex-wrap gap-2">
-            {['all', 'Computer Science', 'Mathematics', 'English', 'Physics', 'Business'].map(department => (
+            {['all', 'Architecture & Design', 'Digital Design', 'Engineering Design'].map(department => (
               <button
                 key={department}
                 onClick={() => setDepartmentFilter(department)}
@@ -557,13 +568,9 @@ export default function Courses() {
                     required
                   >
                     <option value="">Select Department</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Mathematics">Mathematics</option>
-                    <option value="English">English</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Business">Business</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Biology">Biology</option>
+                    <option value="Architecture & Design">Architecture & Design</option>
+                    <option value="Digital Design">Digital Design</option>
+                    <option value="Engineering Design">Engineering Design</option>
                   </select>
                 </div>
 

@@ -18,7 +18,7 @@ export default function Settings() {
     email: 'john.smith@student.jdi.edu',
     phone: '+1 (555) 987-6543',
     studentId: 'STU2024001',
-    program: 'Computer Science',
+    program: 'Architecture & Design',
     year: 'Junior',
     bio: 'Computer Science student passionate about software development and artificial intelligence.',
     notifications: {
@@ -184,10 +184,9 @@ export default function Settings() {
                     onChange={(e) => handleInputChange('program', e.target.value)}
                     className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
                   >
-                    <option>Computer Science</option>
-                    <option>Mathematics</option>
-                    <option>Engineering</option>
-                    <option>Business</option>
+                    <option>Architecture & Design</option>
+                    <option>Digital Design</option>
+                    <option>Engineering Design</option>
                   </select>
                 </div>
                 <div>

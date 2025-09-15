@@ -28,12 +28,13 @@ export default function Lecturers() {
   const [selectedLecturer, setSelectedLecturer] = useState(null);
 
   const lecturers = [
-    { id: 1, name: 'Dr. Sarah Smith', email: 'sarah.smith@university.edu', department: 'Computer Science', courses: 4, students: 156, experience: '8 years', status: 'active' },
-    { id: 2, name: 'Prof. Michael Johnson', email: 'michael.j@university.edu', department: 'Engineering', courses: 3, students: 89, experience: '12 years', status: 'active' },
-    { id: 3, name: 'Dr. Emily Brown', email: 'emily.b@university.edu', department: 'Mathematics', courses: 5, students: 203, experience: '6 years', status: 'active' },
-    { id: 4, name: 'Prof. David Wilson', email: 'david.w@university.edu', department: 'Physics', courses: 2, students: 67, experience: '15 years', status: 'sabbatical' },
-    { id: 5, name: 'Dr. Lisa Davis', email: 'lisa.d@university.edu', department: 'Chemistry', courses: 3, students: 124, experience: '4 years', status: 'active' },
-    { id: 6, name: 'Prof. James Miller', email: 'james.m@university.edu', department: 'Business', courses: 4, students: 178, experience: '10 years', status: 'active' },
+    { id: 1, name: 'Prof. Maria Rodriguez', email: 'maria.rodriguez@university.edu', department: 'Architecture & Design', courses: 2, students: 47, experience: '12 years', status: 'active' },
+    { id: 2, name: 'Dr. James Chen', email: 'james.chen@university.edu', department: 'Architecture & Design', courses: 3, students: 58, experience: '8 years', status: 'active' },
+    { id: 3, name: 'Prof. Sarah Green', email: 'sarah.green@university.edu', department: 'Architecture & Design', courses: 2, students: 38, experience: '10 years', status: 'active' },
+    { id: 4, name: 'Dr. Alex Thompson', email: 'alex.thompson@university.edu', department: 'Digital Design', courses: 3, students: 67, experience: '6 years', status: 'active' },
+    { id: 5, name: 'Prof. Robert Kim', email: 'robert.kim@university.edu', department: 'Engineering Design', courses: 2, students: 39, experience: '15 years', status: 'active' },
+    { id: 6, name: 'Dr. Lisa Wang', email: 'lisa.wang@university.edu', department: 'Engineering Design', courses: 2, students: 48, experience: '9 years', status: 'active' },
+    { id: 7, name: 'Prof. David Martinez', email: 'david.martinez@university.edu', department: 'Engineering Design', courses: 1, students: 17, experience: '11 years', status: 'active' },
   ];
 
   const filteredLecturers = lecturers.filter(lecturer => {
@@ -94,12 +95,9 @@ export default function Lecturers() {
     { name: 'email', label: 'Email Address', type: 'email', required: true },
     { name: 'employeeId', label: 'Employee ID', type: 'text', required: true },
     { name: 'department', label: 'Department', type: 'select', required: true, options: [
-      { value: 'computer_science', label: 'Computer Science' },
-      { value: 'engineering', label: 'Engineering' },
-      { value: 'business', label: 'Business Administration' },
-      { value: 'mathematics', label: 'Mathematics' },
-      { value: 'physics', label: 'Physics' },
-      { value: 'chemistry', label: 'Chemistry' }
+      { value: 'architecture_design', label: 'Architecture & Design' },
+      { value: 'digital_design', label: 'Digital Design' },
+      { value: 'engineering_design', label: 'Engineering Design' }
     ]},
     { name: 'position', label: 'Position', type: 'select', required: true, options: [
       { value: 'professor', label: 'Professor' },
@@ -214,7 +212,7 @@ export default function Lecturers() {
       <div className="bg-white rounded-xl shadow-card p-6">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="flex flex-wrap gap-2">
-            {['all', 'computer science', 'engineering', 'mathematics', 'physics', 'chemistry', 'business'].map(dept => (
+            {['all', 'architecture & design', 'digital design', 'engineering design'].map(dept => (
               <button
                 key={dept}
                 onClick={() => setDepartmentFilter(dept)}

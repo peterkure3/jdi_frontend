@@ -17,14 +17,14 @@ export default function Schedule() {
   const [view, setView] = useState('week');
 
   const schedule = [
-    { id: 1, course: 'Computer Science 101', code: 'CS101', instructor: 'Dr. Smith', time: '09:00-10:30', day: 'Monday', room: 'Room 201', type: 'Lecture' },
-    { id: 2, course: 'Mathematics for CS', code: 'MATH201', instructor: 'Prof. Johnson', time: '14:00-15:30', day: 'Monday', room: 'Room 305', type: 'Lecture' },
-    { id: 3, course: 'Computer Science 101', code: 'CS101', instructor: 'Dr. Smith', time: '11:00-12:30', day: 'Tuesday', room: 'Lab 101', type: 'Lab' },
-    { id: 4, course: 'Physics I', code: 'PHYS101', instructor: 'Dr. Brown', time: '10:00-11:30', day: 'Wednesday', room: 'Room 150', type: 'Lecture' },
-    { id: 5, course: 'English Literature', code: 'ENG201', instructor: 'Ms. Davis', time: '11:00-12:30', day: 'Thursday', room: 'Room 220', type: 'Seminar' },
-    { id: 6, course: 'Mathematics for CS', code: 'MATH201', instructor: 'Prof. Johnson', time: '09:00-10:30', day: 'Thursday', room: 'Room 305', type: 'Tutorial' },
-    { id: 7, course: 'Statistics', code: 'STAT101', instructor: 'Prof. Miller', time: '13:00-14:30', day: 'Friday', room: 'Room 180', type: 'Lecture' },
-    { id: 8, course: 'Physics I', code: 'PHYS101', instructor: 'Dr. Brown', time: '15:00-17:00', day: 'Friday', room: 'Lab 201', type: 'Lab' }
+    { id: 1, course: '3D Architectural Design', code: 'ARCH301', instructor: 'Prof. Rodriguez', time: '09:00-12:00', day: 'Monday', room: 'Design Studio A', type: 'Studio' },
+    { id: 2, course: 'Interior Design', code: 'INTR201', instructor: 'Dr. Chen', time: '10:00-12:30', day: 'Tuesday', room: 'Design Studio B', type: 'Workshop' },
+    { id: 3, course: '3D Architectural Design', code: 'ARCH301', instructor: 'Prof. Rodriguez', time: '09:00-12:00', day: 'Wednesday', room: 'Design Studio A', type: 'Studio' },
+    { id: 4, course: 'Landscape Design', code: 'LAND101', instructor: 'Prof. Green', time: '14:00-15:30', day: 'Wednesday', room: 'Outdoor Lab', type: 'Field Work' },
+    { id: 5, course: 'Graphics Design', code: 'GRPH201', instructor: 'Dr. Thompson', time: '13:00-15:30', day: 'Thursday', room: 'Computer Lab 1', type: 'Lab' },
+    { id: 6, course: 'Interior Design', code: 'INTR201', instructor: 'Dr. Chen', time: '10:00-12:30', day: 'Thursday', room: 'Design Studio B', type: 'Critique' },
+    { id: 7, course: 'Electrical & Wiring Design', code: 'ELEC201', instructor: 'Dr. Wang', time: '13:00-15:30', day: 'Monday', room: 'Engineering Lab', type: 'Lecture' },
+    { id: 8, course: 'Landscape Design', code: 'LAND101', instructor: 'Prof. Green', time: '14:00-15:30', day: 'Friday', room: 'Outdoor Lab', type: 'Project Work' }
   ];
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];

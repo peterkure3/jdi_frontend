@@ -25,81 +25,94 @@ export default function Courses() {
   const courses = [
     { 
       id: 1, 
-      name: 'Computer Science 101', 
-      code: 'CS101', 
-      instructor: 'Dr. Smith', 
+      name: '3D Architectural Design', 
+      code: 'ARCH301', 
+      instructor: 'Prof. Rodriguez', 
       progress: 78, 
       grade: 'B+', 
       credits: 4, 
       status: 'active',
       nextClass: 'Tomorrow 9:00 AM',
       assignments: 3,
-      description: 'Introduction to programming concepts and problem-solving techniques.'
+      description: 'Advanced 3D modeling and architectural visualization using industry-standard software.'
     },
     { 
       id: 2, 
-      name: 'Mathematics for CS', 
-      code: 'MATH201', 
-      instructor: 'Prof. Johnson', 
+      name: 'Interior Design', 
+      code: 'INTR201', 
+      instructor: 'Dr. Chen', 
       progress: 92, 
       grade: 'A', 
       credits: 3, 
       status: 'active',
-      nextClass: 'Today 2:00 PM',
+      nextClass: 'Today 10:00 AM',
       assignments: 1,
-      description: 'Mathematical foundations for computer science including discrete mathematics.'
+      description: 'Principles of interior space planning, color theory, and material selection.'
     },
     { 
       id: 3, 
-      name: 'Physics I', 
-      code: 'PHYS101', 
-      instructor: 'Dr. Brown', 
+      name: 'Landscape Design', 
+      code: 'LAND101', 
+      instructor: 'Prof. Green', 
       progress: 65, 
       grade: 'B', 
-      credits: 4, 
+      credits: 3, 
       status: 'active',
-      nextClass: 'Wed 10:00 AM',
+      nextClass: 'Wed 2:00 PM',
       assignments: 5,
-      description: 'Classical mechanics, thermodynamics, and wave phenomena.'
+      description: 'Sustainable landscape architecture and environmental design principles.'
     },
     { 
       id: 4, 
-      name: 'English Literature', 
-      code: 'ENG201', 
-      instructor: 'Ms. Davis', 
+      name: 'Graphics Design', 
+      code: 'GRPH201', 
+      instructor: 'Dr. Thompson', 
       progress: 88, 
       grade: 'A-', 
       credits: 3, 
       status: 'active',
-      nextClass: 'Thu 11:00 AM',
+      nextClass: 'Thu 1:00 PM',
       assignments: 2,
-      description: 'Survey of major works in English literature from various periods.'
+      description: 'Digital design fundamentals using Adobe Creative Suite and design principles.'
     },
     { 
       id: 5, 
-      name: 'Data Structures', 
-      code: 'CS201', 
-      instructor: 'Dr. Wilson', 
+      name: 'Structural Design', 
+      code: 'STRU301', 
+      instructor: 'Prof. Kim', 
       progress: 100, 
       grade: 'A+', 
       credits: 4, 
       status: 'completed',
       nextClass: 'Completed',
       assignments: 0,
-      description: 'Advanced programming concepts including arrays, linked lists, trees, and graphs.'
+      description: 'Structural analysis and design principles for buildings and infrastructure.'
     },
     { 
       id: 6, 
-      name: 'Statistics', 
-      code: 'STAT101', 
-      instructor: 'Prof. Miller', 
+      name: 'Electrical & Wiring Design', 
+      code: 'ELEC201', 
+      instructor: 'Dr. Wang', 
       progress: 45, 
       grade: 'C+', 
       credits: 3, 
       status: 'active',
-      nextClass: 'Fri 1:00 PM',
+      nextClass: 'Mon 1:00 PM',
       assignments: 4,
-      description: 'Introduction to statistical methods and data analysis.'
+      description: 'Electrical systems design for residential and commercial buildings.'
+    },
+    { 
+      id: 7, 
+      name: 'Mechanical & Plumbing Design', 
+      code: 'MECH301', 
+      instructor: 'Prof. Martinez', 
+      progress: 0, 
+      grade: 'N/A', 
+      credits: 4, 
+      status: 'upcoming',
+      nextClass: 'Starts Spring 2025',
+      assignments: 0,
+      description: 'HVAC and plumbing systems design for building infrastructure.'
     }
   ];
 
@@ -242,7 +255,7 @@ export default function Courses() {
               <BookOpenIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-neutral-800">6</div>
+              <div className="text-2xl font-bold text-neutral-800">7</div>
               <div className="text-sm text-neutral-500">Total Courses</div>
             </div>
           </div>
@@ -253,7 +266,7 @@ export default function Courses() {
               <PlayIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-neutral-800">5</div>
+              <div className="text-2xl font-bold text-neutral-800">6</div>
               <div className="text-sm text-neutral-500">Active Courses</div>
             </div>
           </div>

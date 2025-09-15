@@ -14,19 +14,19 @@ import {
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: 'Dr. Sarah Smith',
-    email: 'sarah.smith@university.edu',
+    name: 'Prof. Maria Rodriguez',
+    email: 'maria.rodriguez@university.edu',
     phone: '+1 (555) 123-4567',
-    department: 'Computer Science',
-    title: 'Associate Professor',
-    office: 'Room CS-204',
-    bio: 'Dr. Sarah Smith is an Associate Professor in the Computer Science Department with over 8 years of teaching experience. She specializes in algorithms, data structures, and machine learning.',
+    department: 'Architecture & Design',
+    title: 'Professor of Architecture',
+    office: 'Room AD-301',
+    bio: 'Prof. Maria Rodriguez is a Professor in the Architecture & Design Department with over 12 years of teaching experience. She specializes in 3D architectural design, sustainable building practices, and digital modeling.',
     education: [
-      { degree: 'Ph.D. in Computer Science', institution: 'MIT', year: '2015' },
-      { degree: 'M.S. in Computer Science', institution: 'Stanford University', year: '2012' },
-      { degree: 'B.S. in Computer Science', institution: 'UC Berkeley', year: '2010' }
+      { degree: 'Ph.D. in Architecture', institution: 'MIT', year: '2012' },
+      { degree: 'M.Arch in Sustainable Design', institution: 'Stanford University', year: '2009' },
+      { degree: 'B.Arch in Architecture', institution: 'UC Berkeley', year: '2007' }
     ],
-    courses: ['CS 101 - Introduction to Programming', 'CS 201 - Data Structures', 'CS 301 - Algorithms', 'CS 401 - Machine Learning'],
+    courses: ['ARCH 301 - 3D Architectural Design', 'INTR 201 - Interior Design', 'LAND 101 - Landscape Design'],
     officeHours: 'Monday & Wednesday: 2:00 PM - 4:00 PM'
   });
 

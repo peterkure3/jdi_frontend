@@ -21,47 +21,47 @@ export default function Resources() {
   const resources = [
     {
       id: 1,
-      title: 'Introduction to Programming',
+      title: '3D Modeling Fundamentals',
       type: 'pdf',
-      course: 'CS101',
-      size: '2.4 MB',
-      uploadDate: '2024-01-15',
-      downloads: 245,
-      description: 'Comprehensive guide to programming fundamentals and best practices.',
-      tags: ['programming', 'basics', 'tutorial']
+      course: 'ARCH301',
+      size: '15.2 MB',
+      uploadDate: '2024-02-15',
+      downloads: 234,
+      description: 'Comprehensive guide to 3D architectural modeling techniques and software tools.',
+      tags: ['3d-modeling', 'architecture', 'design']
     },
     {
       id: 2,
-      title: 'Data Structures Lecture Notes',
-      type: 'pdf',
-      course: 'CS201',
-      size: '1.8 MB',
-      uploadDate: '2024-02-20',
+      title: 'Interior Design Color Theory',
+      type: 'docx',
+      course: 'INTR201',
+      size: '4.1 MB',
+      uploadDate: '2024-03-01',
       downloads: 189,
-      description: 'Complete lecture notes covering arrays, linked lists, trees, and graphs.',
-      tags: ['data-structures', 'algorithms', 'notes']
+      description: 'Complete guide to color theory principles and applications in interior design.',
+      tags: ['color-theory', 'interior-design', 'principles']
     },
     {
       id: 3,
-      title: 'Physics Lab Manual',
+      title: 'Landscape Design Plant Guide',
       type: 'pdf',
-      course: 'PHYS101',
-      size: '5.2 MB',
+      course: 'LAND101',
+      size: '8.7 MB',
       uploadDate: '2024-01-10',
       downloads: 156,
-      description: 'Laboratory experiments and procedures for Physics I course.',
-      tags: ['physics', 'lab', 'experiments']
+      description: 'Comprehensive plant selection guide for sustainable landscape design.',
+      tags: ['landscape', 'plants', 'sustainability']
     },
     {
       id: 4,
-      title: 'Math Problem Sets',
-      type: 'zip',
-      course: 'MATH201',
-      size: '3.1 MB',
+      title: 'Graphics Design Software Tutorials',
+      type: 'video',
+      course: 'GRPH201',
+      size: '125.3 MB',
       uploadDate: '2024-03-05',
       downloads: 203,
-      description: 'Collection of practice problems with solutions for discrete mathematics.',
-      tags: ['mathematics', 'problems', 'practice']
+      description: 'Video tutorials for Adobe Creative Suite and design software mastery.',
+      tags: ['graphics', 'tutorials', 'software']
     },
     {
       id: 5,
@@ -76,17 +76,28 @@ export default function Resources() {
     },
     {
       id: 6,
-      title: 'Literature Analysis Guide',
-      type: 'doc',
-      course: 'ENG201',
-      size: '890 KB',
-      uploadDate: '2024-03-12',
-      downloads: 134,
-      description: 'Guide to analyzing literary works with examples and frameworks.',
-      tags: ['literature', 'analysis', 'writing']
+      title: 'Structural Engineering Standards',
+      type: 'pdf',
+      course: 'STRU301',
+      size: '18.4 MB',
+      uploadDate: '2024-02-20',
+      downloads: 167,
+      description: 'Building codes and structural design standards reference manual.',
+      tags: ['structural', 'standards', 'engineering']
     },
     {
       id: 7,
+      title: 'Electrical Wiring Diagrams',
+      type: 'pdf',
+      course: 'ELEC201',
+      size: '6.8 MB',
+      uploadDate: '2024-03-10',
+      downloads: 142,
+      description: 'Standard electrical wiring diagrams and circuit design examples.',
+      tags: ['electrical', 'wiring', 'circuits']
+    },
+    {
+      id: 8,
       title: 'Statistics Formulas Sheet',
       type: 'pdf',
       course: 'STAT101',
@@ -96,24 +107,13 @@ export default function Resources() {
       description: 'Quick reference sheet with all important statistical formulas.',
       tags: ['statistics', 'formulas', 'reference']
     },
-    {
-      id: 8,
-      title: 'Programming Assignment Templates',
-      type: 'zip',
-      course: 'CS101',
-      size: '2.8 MB',
-      uploadDate: '2024-02-15',
-      downloads: 178,
-      description: 'Starter code templates for programming assignments.',
-      tags: ['programming', 'templates', 'assignments']
-    }
   ];
 
   const filteredResources = resources.filter(resource => {
     const matchesFilter = filter === 'all' || resource.type === filter;
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          resource.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+                         (resource.tags && resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
     return matchesFilter && matchesSearch;
   });
 
@@ -285,7 +285,7 @@ export default function Resources() {
 
             <div className="mb-4">
               <div className="flex flex-wrap gap-1">
-                {resource.tags.map((tag, index) => (
+                {resource.tags && resource.tags.map((tag, index) => (
                   <span key={index} className="inline-block px-2 py-1 bg-neutral-100 text-neutral-600 rounded text-xs">
                     #{tag}
                   </span>

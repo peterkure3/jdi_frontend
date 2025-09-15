@@ -70,10 +70,10 @@ export default function StudentDashboard() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { name: 'Computer Science 101', progress: 78, instructor: 'Dr. Smith', nextClass: 'Tomorrow 9:00 AM' },
-              { name: 'Mathematics', progress: 92, instructor: 'Prof. Johnson', nextClass: 'Today 2:00 PM' },
-              { name: 'Physics', progress: 65, instructor: 'Dr. Brown', nextClass: 'Wed 10:00 AM' },
-              { name: 'English Literature', progress: 88, instructor: 'Ms. Davis', nextClass: 'Thu 11:00 AM' },
+              { name: '3D Architectural Design', progress: 78, instructor: 'Prof. Rodriguez', nextClass: 'Tomorrow 9:00 AM' },
+              { name: 'Interior Design', progress: 92, instructor: 'Dr. Chen', nextClass: 'Today 10:00 AM' },
+              { name: 'Landscape Design', progress: 65, instructor: 'Prof. Green', nextClass: 'Wed 2:00 PM' },
+              { name: 'Graphics Design', progress: 88, instructor: 'Dr. Thompson', nextClass: 'Thu 1:00 PM' },
             ].map((course, i) => (
               <div key={i} className="p-4 border border-neutral-100 rounded-lg hover:shadow-md transition-all">
                 <div className="flex items-start justify-between mb-3">
@@ -109,16 +109,18 @@ export default function StudentDashboard() {
             <h3 className="text-lg font-semibold text-neutral-800 mb-4">Upcoming Events</h3>
             <div className="space-y-4">
               {[
-                { title: 'Math Quiz', date: 'Today', time: '2:00 PM', type: 'quiz' },
-                { title: 'CS Assignment Due', date: 'Tomorrow', time: '11:59 PM', type: 'assignment' },
-                { title: 'Physics Lab', date: 'Wednesday', time: '10:00 AM', type: 'lab' },
-                { title: 'Literature Essay', date: 'Friday', time: '5:00 PM', type: 'assignment' },
+                { title: 'Design Portfolio Review', date: 'Today', time: '2:00 PM', type: 'review' },
+                { title: '3D Model Assignment Due', date: 'Tomorrow', time: '11:59 PM', type: 'assignment' },
+                { title: 'Landscape Site Visit', date: 'Wednesday', time: '2:00 PM', type: 'fieldwork' },
+                { title: 'Graphics Project Presentation', date: 'Friday', time: '1:00 PM', type: 'presentation' },
               ].map((event, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${
                     event.type === 'quiz' ? 'bg-status-warning/10 text-status-warning' :
                     event.type === 'assignment' ? 'bg-status-info/10 text-status-info' :
-                    'bg-accent-purple/10 text-accent-purple'
+                    event.type === 'review' ? 'bg-accent-purple/10 text-accent-purple' :
+                    event.type === 'fieldwork' ? 'bg-accent-cyan/10 text-accent-cyan' :
+                    'bg-accent-pink/10 text-accent-pink'
                   }`}>
                     {event.type === 'quiz' ? <QuestionMarkCircleIcon className="w-4 h-4" /> :
                      event.type === 'assignment' ? <DocumentTextIcon className="w-4 h-4" /> :
