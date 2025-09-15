@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronRightIcon, HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function AdmissionsPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     // Personal Information
     firstName: '',
@@ -95,16 +98,49 @@ export default function AdmissionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb Navigation */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <nav className="flex items-center space-x-2 text-sm">
+            <Link 
+              to="/" 
+              className="flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <HomeIcon className="w-4 h-4 mr-1" />
+              Home
+            </Link>
+            <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+            <span className="text-gray-900 font-medium">Student Application</span>
+          </nav>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-8">
-          {/* Logo and Title Section */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className='w-64'>
-                <img src="/logo.png" alt="" />
+          {/* Back Navigation and Logo Section */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              <span className="text-sm font-medium">Back to Home</span>
+            </button>
+            
+            <div className="flex-1 text-center">
+              <div className="flex items-center justify-center gap-3">
+                <div className='w-64'>
+                  <img src="/logo.png" alt="" />
+                </div>
               </div>
             </div>
+            
+            <div className="w-32"></div> {/* Spacer for centering */}
+          </div>
+          
+          {/* Title Section */}
+          <div className="text-center mb-8">
             
             <h2 className="text-3xl font-bold text-brand-secondary mb-2">STUDENTS REGISTRATION FORM</h2>
             <p className="text-gray-600 mb-2">(Day, Evening, and Weekend Programs)</p>
