@@ -21,15 +21,16 @@ export default function Applications() {
   const [showBulkApproveModal, setShowBulkApproveModal] = useState(false);
   const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  const applications = [
+  const [applications, setApplications] = useState([
     { id: 1, name: 'Sarah Johnson', email: 'sarah.j@email.com', course: 'Computer Science', status: 'pending', date: '2025-01-08', gpa: '3.8' },
     { id: 2, name: 'Michael Chen', email: 'michael.c@email.com', course: 'Engineering', status: 'approved', date: '2025-01-07', gpa: '3.9' },
     { id: 3, name: 'Emma Davis', email: 'emma.d@email.com', course: 'Business Admin', status: 'review', date: '2025-01-06', gpa: '3.7' },
     { id: 4, name: 'James Wilson', email: 'james.w@email.com', course: 'Mathematics', status: 'pending', date: '2025-01-05', gpa: '3.6' },
     { id: 5, name: 'Lisa Brown', email: 'lisa.b@email.com', course: 'Physics', status: 'rejected', date: '2025-01-04', gpa: '3.2' },
     { id: 6, name: 'David Miller', email: 'david.m@email.com', course: 'Chemistry', status: 'approved', date: '2025-01-03', gpa: '3.8' },
-  ];
+  ]);
 
   const filteredApplications = applications.filter(app => {
     const matchesFilter = filter === 'all' || app.status === filter;
@@ -51,7 +52,18 @@ export default function Applications() {
 
   const handleStatusChange = (id, newStatus) => {
     console.log(`Changing application ${id} to ${newStatus}`);
-    // In a real app, this would update the backend
+    setApplications(prev => prev.map(app => (
+      app.id === id ? { ...app, status: newStatus } : app
+    )));
+  };
+
+  const handleToggleSelect = (id) => {
+    setSelectedIds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  };
+
+  const handleSelectAll = () => {
+    const ids = filteredApplications.map(a => a.id);
+    setSelectedIds(prev => (prev.length === ids.length ? [] : ids));
   };
 
   const handleExportApplications = async (exportOptions) => {
@@ -61,7 +73,29 @@ export default function Applications() {
 
   const handleNewApplication = async (applicationData) => {
     console.log('Creating new application:', applicationData);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const nextId = applications.reduce((max, a) => Math.max(max, a.id), 0) + 1;
+    const fullName = `${applicationData?.firstName || ''} ${applicationData?.lastName || ''}`.trim() || 'New Applicant';
+    const courseLabel =
+      applicationData?.course === 'computer_science' ? 'Computer Science' :
+      applicationData?.course === 'engineering' ? 'Engineering' :
+      applicationData?.course === 'business' ? 'Business Administration' :
+      applicationData?.course === 'mathematics' ? 'Mathematics' :
+      applicationData?.course === 'physics' ? 'Physics' :
+      applicationData?.course || 'Unknown';
+
+    const newApp = {
+      id: nextId,
+      name: fullName,
+      email: applicationData?.email || 'new@applicant.com',
+      course: courseLabel,
+      status: 'pending',
+      date: new Date().toISOString().slice(0, 10),
+      gpa: applicationData?.gpa ? String(applicationData.gpa) : '0.0'
+    };
+
+    setApplications(prev => [newApp, ...prev]);
+    setShowNewApplicationModal(false);
   };
 
   const handleViewApplication = (application) => {
@@ -71,12 +105,24 @@ export default function Applications() {
 
   const handleBulkApprove = async () => {
     console.log('Bulk approving applications');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const idsToUpdate = selectedIds.length > 0 ? selectedIds : filteredApplications.map(a => a.id);
+    setApplications(prev => prev.map(app => (
+      idsToUpdate.includes(app.id) ? { ...app, status: 'approved' } : app
+    )));
+    setSelectedIds([]);
+    setShowBulkApproveModal(false);
   };
 
   const handleBulkReject = async () => {
     console.log('Bulk rejecting applications');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const idsToUpdate = selectedIds.length > 0 ? selectedIds : filteredApplications.map(a => a.id);
+    setApplications(prev => prev.map(app => (
+      idsToUpdate.includes(app.id) ? { ...app, status: 'rejected' } : app
+    )));
+    setSelectedIds([]);
+    setShowBulkRejectModal(false);
   };
 
   const newApplicationFields = [
@@ -219,6 +265,14 @@ export default function Applications() {
           <table className="w-full">
             <thead className="bg-neutral-50 border-b border-neutral-200">
               <tr>
+                <th className="text-left px-6 py-4 text-sm font-medium text-neutral-600">
+                  <input
+                    type="checkbox"
+                    checked={filteredApplications.length > 0 && selectedIds.length === filteredApplications.length}
+                    onChange={handleSelectAll}
+                    aria-label="Select all applications"
+                  />
+                </th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-600">Applicant</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-600">Course</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-600">GPA</th>
@@ -230,6 +284,14 @@ export default function Applications() {
             <tbody className="divide-y divide-neutral-100">
               {filteredApplications.map((app) => (
                 <tr key={app.id} className="hover:bg-neutral-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(app.id)}
+                      onChange={() => handleToggleSelect(app.id)}
+                      aria-label={`Select application ${app.name}`}
+                    />
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-lg flex items-center justify-center">
@@ -288,7 +350,10 @@ export default function Applications() {
             Showing {filteredApplications.length} of {applications.length} applications
           </div>
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1 text-sm text-neutral-600 hover:text-neutral-800 transition-colors">
+            <button
+              onClick={handleSelectAll}
+              className="px-3 py-1 text-sm text-neutral-600 hover:text-neutral-800 transition-colors"
+            >
               Select All
             </button>
             <button 

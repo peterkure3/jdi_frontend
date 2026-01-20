@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ExportModal, ImportModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
+import { useMemo, useState } from 'react';
+import { ExportModal, ImportModal, ViewModal, ConfirmationModal, FormModal } from '../../components/shared/modals';
 import {
   AcademicCapIcon,
   ArrowDownTrayIcon,
@@ -28,6 +28,7 @@ export default function Courses() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({
     code: '',
@@ -41,7 +42,7 @@ export default function Courses() {
     description: ''
   });
 
-  const courses = [
+  const [courses, setCourses] = useState([
     { 
       id: 1, 
       code: 'ARCH301', 
@@ -133,16 +134,18 @@ export default function Courses() {
       semester: 'Spring 2025',
       schedule: 'Tue/Thu 9:00-12:00'
     }
-  ];
+  ]);
 
-  const filteredCourses = courses.filter(course => {
-    const matchesFilter = departmentFilter === 'all' || course.department === departmentFilter;
-    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.lecturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.department.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  const filteredCourses = useMemo(() => {
+    return courses.filter(course => {
+      const matchesFilter = departmentFilter === 'all' || course.department === departmentFilter;
+      const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           course.lecturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           course.department.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesFilter && matchesSearch;
+    });
+  }, [courses, departmentFilter, searchTerm]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -164,6 +167,21 @@ export default function Courses() {
   const handleAddCourse = (e) => {
     e.preventDefault();
     console.log('Adding course:', newCourse);
+    const nextId = courses.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+    const nextCourse = {
+      id: nextId,
+      code: (newCourse.code || `NEW${nextId}`).toUpperCase(),
+      name: newCourse.name || `New Course ${nextId}`,
+      department: newCourse.department || 'Digital Design',
+      lecturer: newCourse.lecturer || 'TBD',
+      credits: Number(newCourse.credits) || 3,
+      capacity: Number(newCourse.capacity) || 30,
+      enrolled: 0,
+      status: 'draft',
+      semester: newCourse.semester || 'Fall 2024',
+      schedule: newCourse.schedule || 'TBD'
+    };
+    setCourses(prev => [nextCourse, ...prev]);
     setShowAddModal(false);
     setNewCourse({ name: '', code: '', department: '', credits: '', lecturer: '', description: '' });
   };
@@ -184,8 +202,30 @@ export default function Courses() {
   };
 
   const handleEditCourse = (course) => {
-    console.log('Edit course:', course.id);
-    // Edit functionality can be implemented here
+    setSelectedCourse(course);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCourse = async (courseData) => {
+    console.log('Updating course:', selectedCourse?.id, courseData);
+    await new Promise(resolve => setTimeout(resolve, 600));
+    setCourses(prev => prev.map(c => (
+      c.id === selectedCourse?.id
+        ? {
+            ...c,
+            code: courseData?.code ?? c.code,
+            name: courseData?.name ?? c.name,
+            department: courseData?.department ?? c.department,
+            lecturer: courseData?.lecturer ?? c.lecturer,
+            credits: courseData?.credits !== undefined ? Number(courseData.credits) : c.credits,
+            capacity: courseData?.capacity !== undefined ? Number(courseData.capacity) : c.capacity,
+            semester: courseData?.semester ?? c.semester,
+            schedule: courseData?.schedule ?? c.schedule,
+            status: courseData?.status ?? c.status
+          }
+        : c
+    )));
+    setShowEditModal(false);
   };
 
   const handleDuplicateCourse = (course) => {
@@ -196,6 +236,18 @@ export default function Courses() {
   const handleConfirmDuplicate = async () => {
     console.log('Duplicating course:', selectedCourse?.id);
     await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!selectedCourse) return;
+    const nextId = courses.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+    const cloned = {
+      ...selectedCourse,
+      id: nextId,
+      code: `${selectedCourse.code}-COPY`,
+      name: `${selectedCourse.name} (Copy)`,
+      enrolled: 0,
+      status: 'draft'
+    };
+    setCourses(prev => [cloned, ...prev]);
+    setShowDuplicateModal(false);
   };
 
   const handleDeleteCourse = (course) => {
@@ -206,6 +258,8 @@ export default function Courses() {
   const handleConfirmDelete = async () => {
     console.log('Deleting course:', selectedCourse?.id);
     await new Promise(resolve => setTimeout(resolve, 1000));
+    setCourses(prev => prev.filter(c => c.id !== selectedCourse?.id));
+    setShowDeleteModal(false);
   };
 
   const courseViewFields = [
@@ -217,6 +271,26 @@ export default function Courses() {
     { name: 'students', label: 'Enrolled Students', type: 'text' },
     { name: 'schedule', label: 'Schedule', type: 'text' },
     { name: 'status', label: 'Status', type: 'status' }
+  ];
+
+  const courseEditFields = [
+    { name: 'code', label: 'Course Code', type: 'text', required: true },
+    { name: 'name', label: 'Course Name', type: 'text', required: true, fullWidth: true },
+    { name: 'department', label: 'Department', type: 'select', required: true, options: [
+      { value: 'Architecture & Design', label: 'Architecture & Design' },
+      { value: 'Digital Design', label: 'Digital Design' },
+      { value: 'Engineering Design', label: 'Engineering Design' }
+    ]},
+    { name: 'lecturer', label: 'Lecturer', type: 'text', required: true },
+    { name: 'credits', label: 'Credits', type: 'number', required: true },
+    { name: 'capacity', label: 'Capacity', type: 'number', required: true },
+    { name: 'semester', label: 'Semester', type: 'text' },
+    { name: 'schedule', label: 'Schedule', type: 'text' },
+    { name: 'status', label: 'Status', type: 'select', required: true, options: [
+      { value: 'active', label: 'Active' },
+      { value: 'draft', label: 'Draft' },
+      { value: 'inactive', label: 'Inactive' }
+    ]}
   ];
 
   const getDepartmentColor = (department) => {
@@ -477,6 +551,7 @@ export default function Courses() {
           <h4 className="font-semibold text-neutral-800 mb-2">Manage Enrollment</h4>
           <p className="text-sm text-neutral-600 mb-4">View and manage student enrollments</p>
           <button 
+            onClick={() => window.alert('Enrollment management is not implemented in demo mode.')}
             className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
           >
             View Enrollments
@@ -490,6 +565,7 @@ export default function Courses() {
           <h4 className="font-semibold text-neutral-800 mb-2">Schedule Builder</h4>
           <p className="text-sm text-neutral-600 mb-4">Create and manage course schedules</p>
           <button 
+            onClick={() => window.alert('Schedule builder is not implemented in demo mode.')}
             className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
           >
             Build Schedule
@@ -746,6 +822,18 @@ export default function Courses() {
             icon: DocumentDuplicateIcon
           }
         ]}
+      />
+
+      <FormModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleUpdateCourse}
+        title="Edit Course"
+        subtitle="Update course information"
+        fields={courseEditFields}
+        initialData={selectedCourse}
+        submitText="Update Course"
+        mode="edit"
       />
 
       <ConfirmationModal

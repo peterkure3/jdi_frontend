@@ -24,8 +24,16 @@ export default function Communications() {
   const [showEditMessageModal, setShowEditMessageModal] = useState(false);
   const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [composeData, setComposeData] = useState({
+    messageType: 'announcement',
+    recipients: 'all_students',
+    subject: '',
+    message: '',
+    sendImmediately: true,
+    highPriority: false
+  });
 
-  const announcements = [
+  const [announcements, setAnnouncements] = useState([
     {
       id: 1,
       title: 'Spring Semester Registration Open',
@@ -56,9 +64,9 @@ export default function Communications() {
       status: 'draft',
       views: 0
     }
-  ];
+  ]);
 
-  const messages = [
+  const [messages, setMessages] = useState([
     {
       id: 1,
       subject: 'Grade Submission Deadline',
@@ -86,15 +94,15 @@ export default function Communications() {
       status: 'scheduled',
       priority: 'normal'
     }
-  ];
+  ]);
 
-  const templates = [
+  const [templates] = useState([
     { id: 1, name: 'Welcome Message', category: 'Onboarding', usage: 45 },
     { id: 2, name: 'Grade Notification', category: 'Academic', usage: 123 },
     { id: 3, name: 'Payment Reminder', category: 'Financial', usage: 67 },
     { id: 4, name: 'System Maintenance', category: 'Technical', usage: 12 },
     { id: 5, name: 'Course Registration', category: 'Academic', usage: 89 }
-  ];
+  ]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -110,9 +118,31 @@ export default function Communications() {
     }
   };
 
+  const createDemoMessage = (messageData, overrides = {}) => {
+    const nextId = messages.reduce((max, m) => Math.max(max, m.id), 0) + 1;
+    const priority = messageData?.priority || (messageData?.highPriority ? 'high' : 'normal');
+    const to =
+      messageData?.recipients === 'all_students' ? 'All Students' :
+      messageData?.recipients === 'all_faculty' ? 'All Faculty' :
+      messageData?.recipients === 'all_staff' ? 'All Staff' :
+      messageData?.recipients || 'All Users';
+
+    return {
+      id: nextId,
+      subject: messageData?.subject || '(No subject)',
+      from: 'admin@jdi.edu',
+      to,
+      date: new Date().toISOString().slice(0, 10),
+      status: 'sent',
+      priority,
+      ...overrides
+    };
+  };
+
   const handleNewMessage = async (messageData) => {
     console.log('Sending new message:', messageData);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 600));
+    setMessages(prev => [createDemoMessage(messageData), ...prev]);
     setShowNewMessageModal(false);
   };
 
@@ -128,7 +158,22 @@ export default function Communications() {
 
   const handleUpdateMessage = async (messageData) => {
     console.log('Updating message:', selectedMessage?.id, messageData);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 600));
+    setMessages(prev => prev.map(m => (
+      m.id === selectedMessage?.id
+        ? {
+            ...m,
+            subject: messageData?.subject ?? m.subject,
+            to: messageData?.recipients ? (
+              messageData.recipients === 'all_students' ? 'All Students' :
+              messageData.recipients === 'all_faculty' ? 'All Faculty' :
+              messageData.recipients === 'all_staff' ? 'All Staff' :
+              messageData.recipients
+            ) : m.to,
+            priority: messageData?.priority ?? m.priority
+          }
+        : m
+    )));
     setShowEditMessageModal(false);
   };
 
@@ -139,7 +184,9 @@ export default function Communications() {
 
   const handleConfirmDelete = async () => {
     console.log('Deleting message:', selectedMessage?.id);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 400));
+    setMessages(prev => prev.filter(m => m.id !== selectedMessage?.id));
+    setAnnouncements(prev => prev.filter(a => a.id !== selectedMessage?.id));
     setShowDeleteMessageModal(false);
   };
 
@@ -147,6 +194,77 @@ export default function Communications() {
     console.log('Importing contacts from file:', file.name);
     await new Promise(resolve => setTimeout(resolve, 3000));
     setShowImportContactsModal(false);
+  };
+
+  const handleComposeChange = (key, value) => {
+    setComposeData(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleComposeSend = async () => {
+    await handleNewMessage({
+      recipients: composeData.recipients,
+      subject: composeData.subject,
+      messageType: composeData.messageType,
+      priority: composeData.highPriority ? 'high' : 'normal',
+      message: composeData.message
+    });
+    setComposeData(prev => ({
+      ...prev,
+      subject: '',
+      message: ''
+    }));
+  };
+
+  const handleComposeSaveDraft = async () => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    setMessages(prev => [
+      createDemoMessage(
+        {
+          recipients: composeData.recipients,
+          subject: composeData.subject,
+          priority: composeData.highPriority ? 'high' : 'normal'
+        },
+        { status: 'draft' }
+      ),
+      ...prev
+    ]);
+    setComposeData(prev => ({
+      ...prev,
+      subject: '',
+      message: ''
+    }));
+  };
+
+  const handleComposeSchedule = async () => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    setMessages(prev => [
+      createDemoMessage(
+        {
+          recipients: composeData.recipients,
+          subject: composeData.subject,
+          priority: composeData.highPriority ? 'high' : 'normal'
+        },
+        { status: 'scheduled' }
+      ),
+      ...prev
+    ]);
+    setComposeData(prev => ({
+      ...prev,
+      subject: '',
+      message: ''
+    }));
+  };
+
+  const handleUseTemplate = (template) => {
+    setActiveTab('compose');
+    setComposeData(prev => ({
+      ...prev,
+      subject: template?.name || prev.subject,
+      message: `Using template: ${template?.name || ''}`
+    }));
   };
 
   const newMessageFields = [
@@ -386,11 +504,26 @@ export default function Communications() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View">
+                          <button
+                            onClick={() => handleViewMessage(message)}
+                            className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                            title="View"
+                          >
                             <EyeIcon className="w-4 h-4" />
                           </button>
-                          <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                          <button
+                            onClick={() => handleEditMessage(message)}
+                            className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                            title="Edit"
+                          >
                             <PencilIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMessage(message)}
+                            className="p-2 text-status-error hover:bg-status-error/10 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <TrashIcon className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -411,13 +544,20 @@ export default function Communications() {
                       <h4 className="font-semibold text-neutral-800">{template.name}</h4>
                       <p className="text-sm text-neutral-600">{template.category}</p>
                     </div>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit Template">
+                    <button
+                      onClick={() => window.alert('Template editing is not implemented in demo mode.')}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                      title="Edit Template"
+                    >
                       <PencilIcon className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-neutral-500">Used {template.usage} times</span>
-                    <button className="bg-brand-primary text-white px-3 py-1 rounded text-sm hover:bg-brand-primaryDark transition-colors">
+                    <button
+                      onClick={() => handleUseTemplate(template)}
+                      className="bg-brand-primary text-white px-3 py-1 rounded text-sm hover:bg-brand-primaryDark transition-colors"
+                    >
                       Use Template
                     </button>
                   </div>
@@ -433,7 +573,8 @@ export default function Communications() {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Message Type</label>
                   <select
-                    defaultValue="announcement"
+                    value={composeData.messageType}
+                    onChange={(e) => handleComposeChange('messageType', e.target.value)}
                     className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
                   >
                     <option value="announcement">Announcement</option>
@@ -445,7 +586,8 @@ export default function Communications() {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Recipients</label>
                   <select
-                    defaultValue="all_students"
+                    value={composeData.recipients}
+                    onChange={(e) => handleComposeChange('recipients', e.target.value)}
                     className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
                   >
                     <option value="all">All Users</option>
@@ -463,6 +605,8 @@ export default function Communications() {
                   <input
                     type="text"
                     placeholder="Enter message subject..."
+                    value={composeData.subject}
+                    onChange={(e) => handleComposeChange('subject', e.target.value)}
                     className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
                   />
                 </div>
@@ -471,27 +615,48 @@ export default function Communications() {
                   <textarea
                     rows={8}
                     placeholder="Write your message here..."
+                    value={composeData.message}
+                    onChange={(e) => handleComposeChange('message', e.target.value)}
                     className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors resize-none"
                   />
                 </div>
                 <div className="flex items-center gap-4">
                   <label className="flex items-center">
-                    <input type="checkbox" className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20" />
+                    <input
+                      type="checkbox"
+                      checked={composeData.sendImmediately}
+                      onChange={(e) => handleComposeChange('sendImmediately', e.target.checked)}
+                      className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20"
+                    />
                     <span className="ml-2 text-sm text-neutral-700">Send immediately</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20" />
+                    <input
+                      type="checkbox"
+                      checked={composeData.highPriority}
+                      onChange={(e) => handleComposeChange('highPriority', e.target.checked)}
+                      className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20"
+                    />
                     <span className="ml-2 text-sm text-neutral-700">High priority</span>
                   </label>
                 </div>
                 <div className="flex items-center gap-3 pt-4">
-                  <button className="bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all">
+                  <button
+                    onClick={handleComposeSend}
+                    className="bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all"
+                  >
                     Send Message
                   </button>
-                  <button className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors">
+                  <button
+                    onClick={handleComposeSaveDraft}
+                    className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
+                  >
                     Save Draft
                   </button>
-                  <button className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors">
+                  <button
+                    onClick={handleComposeSchedule}
+                    className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
+                  >
                     Schedule
                   </button>
                 </div>
