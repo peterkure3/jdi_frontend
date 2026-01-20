@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   CalendarIcon,
@@ -15,12 +16,25 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function Courses() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [showViewCourseModal, setShowViewCourseModal] = useState(false);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [showDropModal, setShowDropModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const courses = [
     { 
@@ -151,12 +165,12 @@ export default function Courses() {
 
   const handleContinueLearning = (course) => {
     console.log('Continuing learning for course:', course.id);
-    // Navigate to course content page
+    window.alert(`Continue Learning is not implemented in demo mode.\n\n${course.name}`);
   };
 
   const handleViewMaterials = (course) => {
     console.log('Viewing materials for course:', course.id);
-    // Navigate to materials page or open materials modal
+    navigate('/student/resources');
   };
 
   const handleSubmitAssignment = (course) => {
@@ -183,12 +197,16 @@ export default function Courses() {
 
   const handleViewCertificate = (course) => {
     console.log('Viewing certificate for course:', course.id);
-    // Generate and download certificate
+    const safeName = (course?.code || 'course').replace(/[^a-z0-9-_]+/gi, '_');
+    downloadTextFile(
+      `certificate-${safeName}-demo.txt`,
+      `JDI Demo Certificate\n\nThis certifies completion of:\n${course?.name} (${course?.code})\n\nStatus: ${course?.status}\nGenerated: ${new Date().toISOString()}\n`
+    );
   };
 
   const handleViewSchedule = () => {
     console.log('Viewing schedule');
-    // Navigate to schedule page
+    navigate('/student/schedule');
   };
 
   // Field definitions

@@ -1,4 +1,5 @@
 import OverviewCard from '../../components/shared/OverviewCard.jsx';
+import { useNavigate } from 'react-router-dom';
 import {
   CalendarIcon,
   PlusIcon,
@@ -16,6 +17,12 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function LecturerDashboard() {
+  const navigate = useNavigate();
+
+  const handleMarkAttendance = (classInfo) => {
+    window.alert(`Attendance marking is not implemented in demo mode.\n\n${classInfo.course} • ${classInfo.time}`);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -25,11 +32,17 @@ export default function LecturerDashboard() {
           <p className="text-neutral-600 mt-1">Manage your courses and students</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button
+            onClick={() => navigate('/lecturer/schedule')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <CalendarIcon className="w-4 h-4" />
             View Schedule
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-xl hover:shadow-lg transition-all">
+          <button
+            onClick={() => navigate('/lecturer/assignments')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary  text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             New Assignment
           </button>
@@ -70,7 +83,10 @@ export default function LecturerDashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl shadow-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-neutral-800">Today's Schedule</h3>
-            <button className="text-sm text-brand-primary hover:text-brand-primaryDark transition-colors">
+            <button
+              onClick={() => navigate('/lecturer/schedule')}
+              className="text-sm text-brand-primary hover:text-brand-primaryDark transition-colors"
+            >
               View Full Schedule
             </button>
           </div>
@@ -99,7 +115,10 @@ export default function LecturerDashboard() {
                   <div className="flex items-center gap-4">
                     <span className="text-sm font-medium text-neutral-700">{class_.time}</span>
                     {class_.status === 'current' && (
-                      <button className="px-3 py-1 bg-brand-primary text-white text-xs rounded-full hover:bg-brand-primaryDark transition-colors">
+                      <button
+                        onClick={() => handleMarkAttendance(class_)}
+                        className="px-3 py-1 bg-brand-primary text-white text-xs rounded-full hover:bg-brand-primaryDark transition-colors"
+                      >
                         Mark Attendance
                       </button>
                     )}
@@ -146,15 +165,24 @@ export default function LecturerDashboard() {
             <h3 className="text-lg font-semibold mb-2">Quick Actions</h3>
             <p className="text-white/80 text-sm mb-4">Manage your classes efficiently</p>
             <div className="space-y-2">
-              <button className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center">
+              <button
+                onClick={() => navigate('/lecturer/assignments')}
+                className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center"
+              >
                 <PlusIcon className="w-4 h-4 mr-2" />
                 Create Assignment
               </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center">
+              <button
+                onClick={() => navigate('/lecturer/grades')}
+                className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center"
+              >
                 <ChartBarIcon className="w-4 h-4 mr-2" />
                 View Gradebook
               </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center">
+              <button
+                onClick={() => navigate('/lecturer/messages')}
+                className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center"
+              >
                 <SpeakerWaveIcon className="w-4 h-4 mr-2" />
                 Send Announcement
               </button>

@@ -21,6 +21,53 @@ export default function Materials() {
   const [activeTab, setActiveTab] = useState('documents');
   const [showUploadModal, setShowUploadModal] = useState(false);
 
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownload = (material) => {
+    const safeName = (material?.name || 'material').replace(/[^a-z0-9-_\.]+/gi, '_');
+    downloadTextFile(
+      `material-${safeName}-demo.txt`,
+      `JDI Demo Material Download\n\nName: ${material?.name}\nCourse: ${material?.course}\nSize: ${material?.size}\nUploaded: ${material?.uploadDate}\nGenerated: ${new Date().toISOString()}\n`
+    );
+  };
+
+  const handleShare = async (material) => {
+    const shareText = `JDI Demo Material: ${material?.name} (${material?.course})`;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareText);
+        window.alert('Material info copied to clipboard (demo).');
+        return;
+      }
+    } catch {
+      // ignore
+    }
+    window.alert('Share is not supported in this browser (demo).');
+  };
+
+  const handleEdit = (material) => {
+    window.alert(`Edit is not implemented in demo mode.\n\n${material?.name}`);
+  };
+
+  const handleDelete = (material) => {
+    window.alert(`Delete is not implemented in demo mode.\n\n${material?.name}`);
+  };
+
+  const handleUpload = () => {
+    window.alert('Upload is not implemented in demo mode.');
+    setShowUploadModal(false);
+  };
+
   const materials = {
     documents: [
       { id: 1, name: 'Course Syllabus.pdf', size: '2.4 MB', type: 'pdf', course: 'Computer Science 101', uploadDate: '2024-03-15', downloads: 45 },
@@ -180,16 +227,32 @@ export default function Materials() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Download">
+                  <button
+                    onClick={() => handleDownload(material)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Download"
+                  >
                     <ArrowDownTrayIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Share">
+                  <button
+                    onClick={() => handleShare(material)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Share"
+                  >
                     <ShareIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                  <button
+                    onClick={() => handleEdit(material)}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Edit"
+                  >
                     <PencilIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                  <button
+                    onClick={() => handleDelete(material)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete"
+                  >
                     <TrashIcon className="w-4 h-4" />
                   </button>
                 </div>
@@ -248,7 +311,10 @@ export default function Materials() {
                 </div>
               </div>
               <div className="flex items-center gap-3 pt-4">
-                <button className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white py-2 rounded-lg font-medium hover:shadow-lg transition-all">
+                <button
+                  onClick={handleUpload}
+                  className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white py-2 rounded-lg font-medium hover:shadow-lg transition-all"
+                >
                   Upload Material
                 </button>
                 <button 

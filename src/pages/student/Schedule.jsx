@@ -16,6 +16,38 @@ export default function Schedule() {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [view, setView] = useState('week');
 
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportCalendar = () => {
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//JDI Demo//Student Schedule//EN',
+      ...schedule.map(item => (
+        [
+          'BEGIN:VEVENT',
+          `SUMMARY:${item.course} (${item.code})`,
+          `DESCRIPTION:${item.type} - ${item.instructor} - ${item.room}`,
+          `LOCATION:${item.room}`,
+          'END:VEVENT'
+        ].join('\n')
+      )),
+      'END:VCALENDAR'
+    ].join('\n');
+
+    downloadTextFile('jdi-student-schedule-demo.ics', ics);
+  };
+
   const schedule = [
     { id: 1, course: '3D Architectural Design', code: 'ARCH301', instructor: 'Prof. Rodriguez', time: '09:00-12:00', day: 'Monday', room: 'Design Studio A', type: 'Studio' },
     { id: 2, course: 'Interior Design', code: 'INTR201', instructor: 'Dr. Chen', time: '10:00-12:30', day: 'Tuesday', room: 'Design Studio B', type: 'Workshop' },
@@ -267,7 +299,10 @@ export default function Schedule() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Set Reminders</h4>
           <p className="text-sm text-neutral-600 mb-4">Get notified before your classes start</p>
-          <button className="w-full bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={() => window.alert('Reminders management is not implemented in demo mode.')}
+            className="w-full bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Manage Reminders
           </button>
         </div>
@@ -278,7 +313,10 @@ export default function Schedule() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Export Schedule</h4>
           <p className="text-sm text-neutral-600 mb-4">Download your schedule to calendar apps</p>
-          <button className="w-full bg-gradient-to-r from-status-success to-accent-lime text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={handleExportCalendar}
+            className="w-full bg-gradient-to-r from-status-success to-accent-lime text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Export Calendar
           </button>
         </div>
@@ -289,7 +327,10 @@ export default function Schedule() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Study Groups</h4>
           <p className="text-sm text-neutral-600 mb-4">Find classmates for group study sessions</p>
-          <button className="w-full bg-gradient-to-r from-accent-cyan to-accent-cyanDark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={() => window.alert('Study groups are not implemented in demo mode.')}
+            className="w-full bg-gradient-to-r from-accent-cyan to-accent-cyanDark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Find Groups
           </button>
         </div>

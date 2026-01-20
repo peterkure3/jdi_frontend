@@ -34,7 +34,7 @@ export default function Messages() {
   const [showMessageTemplateModal, setShowMessageTemplateModal] = useState(false);
   const [showArchiveConfirmModal, setShowArchiveConfirmModal] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
-  const messages = [
+  const [messages, setMessages] = useState([
     {
       id: 1,
       from: 'John Smith',
@@ -83,7 +83,7 @@ export default function Messages() {
       priority: 'normal',
       category: 'grades'
     }
-  ];
+  ]);
 
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -113,10 +113,9 @@ export default function Messages() {
 
   const handleReply = () => {
     if (replyText.trim() && selectedMessage) {
-      // Handle reply logic here
       console.log('Replying to:', selectedMessage.id, 'with:', replyText);
+      window.alert('Reply sent (demo only).');
       setReplyText('');
-      // You would typically send this to your backend
     }
   };
 
@@ -128,12 +127,14 @@ export default function Messages() {
 
   const handleMarkAsRead = (message) => {
     console.log('Marking message as read:', message.id);
-    // Update message read status
+    setMessages(prev => prev.map(m => (m.id === message.id ? { ...m, isRead: true } : m)));
+    setSelectedMessage(prev => (prev?.id === message.id ? { ...prev, isRead: true } : prev));
   };
 
   const handleMarkAsUnread = (message) => {
     console.log('Marking message as unread:', message.id);
-    // Update message read status
+    setMessages(prev => prev.map(m => (m.id === message.id ? { ...m, isRead: false } : m)));
+    setSelectedMessage(prev => (prev?.id === message.id ? { ...prev, isRead: false } : prev));
   };
 
   const handleArchiveMessage = (message) => {
@@ -149,31 +150,40 @@ export default function Messages() {
   const handleConfirmArchive = async () => {
     console.log('Archiving message:', selectedMessage?.id);
     await new Promise(resolve => setTimeout(resolve, 1000));
+    setMessages(prev => prev.filter(m => m.id !== selectedMessage?.id));
+    setSelectedMessage(prev => (prev?.id === selectedMessage?.id ? null : prev));
     setShowArchiveConfirmModal(false);
+    window.alert('Message archived (demo only).');
   };
 
   const handleConfirmDelete = async () => {
     console.log('Deleting message:', selectedMessage?.id);
     await new Promise(resolve => setTimeout(resolve, 1000));
+    setMessages(prev => prev.filter(m => m.id !== selectedMessage?.id));
+    setSelectedMessage(prev => (prev?.id === selectedMessage?.id ? null : prev));
     setShowDeleteConfirmModal(false);
+    window.alert('Message deleted (demo only).');
   };
 
   const handleBulkMessage = async (bulkData) => {
     console.log('Sending bulk message:', bulkData);
     await new Promise(resolve => setTimeout(resolve, 2000));
     setShowBulkMessageModal(false);
+    window.alert('Bulk message sent (demo only).');
   };
 
   const handleSetupAutoReply = async (autoReplyData) => {
     console.log('Setting up auto-reply:', autoReplyData);
     await new Promise(resolve => setTimeout(resolve, 1500));
     setShowAutoReplyModal(false);
+    window.alert('Auto-reply settings saved (demo only).');
   };
 
   const handleCreateTemplate = async (templateData) => {
     console.log('Creating message template:', templateData);
     await new Promise(resolve => setTimeout(resolve, 1500));
     setShowMessageTemplateModal(false);
+    window.alert('Template created (demo only).');
   };
 
 
@@ -449,11 +459,17 @@ export default function Messages() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <button className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors">
+                  <button
+                    onClick={() => window.alert('Attachments are not implemented in demo mode.')}
+                    className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors"
+                  >
                     <PaperClipIcon className="w-4 h-4" />
                     Attach File
                   </button>
-                  <button className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors">
+                  <button
+                    onClick={() => window.alert('Emoji picker is not implemented in demo mode.')}
+                    className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors"
+                  >
                     <FaceSmileIcon className="w-4 h-4" />
                     Add Emoji
                   </button>

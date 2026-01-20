@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FormModal, ViewModal, ImportModal } from '../../components/shared/modals';
 import MessageComposeModal from '../../components/shared/MessageComposeModal';
 import {
@@ -20,6 +21,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function Courses() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('active');
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
   const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
@@ -140,17 +142,17 @@ export default function Courses() {
 
   const handleManageCourse = (course) => {
     console.log('Managing course:', course.id);
-    // Navigate to course management page
+    window.alert('Course management is not implemented in demo mode.');
   };
 
   const handleViewStudents = (course) => {
     console.log('Viewing students for course:', course.id);
-    // Navigate to students page or open students modal
+    navigate('/lecturer/students');
   };
 
   const handleGradebook = (course) => {
     console.log('Opening gradebook for course:', course.id);
-    // Navigate to gradebook page
+    navigate('/lecturer/grades');
   };
 
   const handleUploadMaterials = (course) => {
@@ -166,12 +168,12 @@ export default function Courses() {
 
   const handleViewAnalytics = (course) => {
     console.log('Viewing analytics for course:', course?.id || 'all courses');
-    // Navigate to analytics page
+    window.alert('Analytics is not implemented in demo mode.');
   };
 
   const handleCreateAssignment = () => {
     console.log('Creating new assignment');
-    // Navigate to assignment creation page
+    navigate('/lecturer/assignments');
   };
 
   // Field definitions
@@ -217,7 +219,10 @@ export default function Courses() {
             <EnvelopeIcon className="w-4 h-4" />
             Compose Message
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button
+            onClick={() => navigate('/lecturer/schedule')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <CalendarIcon className="w-4 h-4" />
             View Schedule
           </button>

@@ -30,10 +30,24 @@ export default function Profile() {
     officeHours: 'Monday & Wednesday: 2:00 PM - 4:00 PM'
   });
 
+  const [draftData, setDraftData] = useState(profileData);
+
+  const handleStartEditing = () => {
+    setDraftData(profileData);
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setProfileData(draftData);
+    setIsEditing(false);
+    window.alert('Changes discarded (demo only).');
+  };
+
   const handleSave = () => {
     setIsEditing(false);
     // In a real app, this would save to backend
     console.log('Profile updated:', profileData);
+    window.alert('Profile saved (demo only).');
   };
 
   return (
@@ -48,7 +62,7 @@ export default function Profile() {
           {isEditing ? (
             <>
               <button 
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancel}
                 className="px-4 py-2 border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
               >
                 Cancel
@@ -62,7 +76,7 @@ export default function Profile() {
             </>
           ) : (
             <button 
-              onClick={() => setIsEditing(true)}
+              onClick={handleStartEditing}
               className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-xl hover:shadow-lg transition-all"
             >
               <PencilIcon className="w-4 h-4" />

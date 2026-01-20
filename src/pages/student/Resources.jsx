@@ -18,6 +18,45 @@ export default function Resources() {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownload = (resource) => {
+    const safeName = (resource?.title || 'resource').replace(/[^a-z0-9-_]+/gi, '_');
+    const filename = `${safeName}.${resource?.type === 'video' ? 'txt' : resource?.type || 'txt'}`;
+    downloadTextFile(
+      filename,
+      `Demo download\n\nTitle: ${resource?.title}\nCourse: ${resource?.course}\nType: ${resource?.type}\nSize: ${resource?.size}\n`
+    );
+  };
+
+  const handlePreview = (resource) => {
+    window.alert(`Preview is not implemented in demo mode.\n\n${resource?.title}`);
+  };
+
+  const handleShare = async (resource) => {
+    const text = `Resource: ${resource?.title} (${resource?.course})`;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        window.alert('Link copied to clipboard (demo).');
+        return;
+      }
+    } catch {
+      // ignore
+    }
+    window.alert(text);
+  };
+
   const resources = [
     {
       id: 1,
@@ -295,14 +334,25 @@ export default function Resources() {
 
             <div className="pt-4 border-t border-neutral-100">
               <div className="flex items-center gap-2">
-                <button className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all flex items-center justify-center gap-2">
+                <button
+                  onClick={() => handleDownload(resource)}
+                  className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all flex items-center justify-center gap-2"
+                >
                   <ArrowDownTrayIcon className="w-4 h-4" />
                   Download
                 </button>
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Preview">
+                <button
+                  onClick={() => handlePreview(resource)}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  title="Preview"
+                >
                   <EyeIcon className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Share">
+                <button
+                  onClick={() => handleShare(resource)}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  title="Share"
+                >
                   <ShareIcon className="w-4 h-4" />
                 </button>
               </div>
@@ -330,7 +380,10 @@ export default function Resources() {
               <div className="text-sm text-neutral-500">
                 {new Date(resource.uploadDate).toLocaleDateString()}
               </div>
-              <button className="text-brand-primary hover:text-brand-primaryDark transition-colors">
+              <button
+                onClick={() => handleDownload(resource)}
+                className="text-brand-primary hover:text-brand-primaryDark transition-colors"
+              >
                 <ArrowDownTrayIcon className="w-4 h-4" />
               </button>
             </div>

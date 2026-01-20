@@ -91,10 +91,22 @@ export default function Financial() {
     }
   ];
 
-  const paymentMethods = [
+  const [paymentMethods, setPaymentMethods] = useState([
     { id: 1, type: 'card', last4: '4532', brand: 'Visa', isDefault: true },
     { id: 2, type: 'bank', last4: '7890', bank: 'Chase Bank', isDefault: false }
-  ];
+  ]);
+
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const getTransactionIcon = (type) => {
     switch (type) {
@@ -134,6 +146,22 @@ export default function Financial() {
   const handleAddPaymentMethod = async (methodData) => {
     console.log('Adding payment method:', methodData);
     await new Promise(resolve => setTimeout(resolve, 1500));
+    const nextId = paymentMethods.reduce((max, m) => Math.max(max, m.id), 0) + 1;
+    const next = {
+      id: nextId,
+      type: methodData?.type === 'bank' ? 'bank' : 'card',
+      last4: String(methodData?.cardNumber || methodData?.accountNumber || '0000').replace(/\D+/g, '').slice(-4) || '0000',
+      brand: methodData?.type === 'card' ? 'Card' : undefined,
+      bank: methodData?.type === 'bank' ? (methodData?.bankName || 'Bank') : undefined,
+      isDefault: Boolean(methodData?.isDefault)
+    };
+    setPaymentMethods(prev => {
+      const withDefaultUpdated = next.isDefault
+        ? prev.map(p => ({ ...p, isDefault: false }))
+        : prev;
+      return [next, ...withDefaultUpdated];
+    });
+    setSelectedPaymentMethod(null);
     setShowPaymentMethodModal(false);
   };
 
@@ -144,12 +172,15 @@ export default function Financial() {
 
   const handleDownloadStatement = () => {
     console.log('Downloading statement for period:', selectedPeriod);
-    // Generate and download PDF statement
+    downloadTextFile(
+      `student-statement-${selectedPeriod}-demo.txt`,
+      `JDI Demo Statement\n\nPeriod: ${selectedPeriod}\nGenerated: ${new Date().toISOString()}\n\nOutstanding: ${accountBalance.outstanding}\nPaid: ${accountBalance.paid}\nTotal: ${accountBalance.total}\n`
+    );
   };
 
   const handlePrintTransactions = () => {
     console.log('Printing transactions for period:', selectedPeriod);
-    // Open print dialog
+    window.print();
   };
 
   const handleSetupPaymentPlan = async (planData) => {
@@ -177,7 +208,9 @@ export default function Financial() {
 
   const handleDeletePaymentMethod = (method) => {
     console.log('Deleting payment method:', method.id);
-    // Show confirmation and delete
+    const ok = window.confirm('Delete this payment method? (demo)');
+    if (!ok) return;
+    setPaymentMethods(prev => prev.filter(m => m.id !== method.id));
   };
 
   // Field definitions
@@ -363,7 +396,10 @@ export default function Financial() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-neutral-800">Payment Methods</h2>
           <button 
-            onClick={() => setShowPaymentMethodModal(true)}
+            onClick={() => {
+              setSelectedPaymentMethod(null);
+              setShowPaymentMethodModal(true);
+            }}
             className="bg-brand-primary hover:bg-brand-primary-dark text-white px-4 py-2 rounded-lg text-sm transition-colors"
           >
             <PlusIcon className="w-4 h-4 mr-2" />
@@ -479,7 +515,10 @@ export default function Financial() {
           </div>
           
           <div className="mt-6 text-center">
-            <button className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg hover:bg-neutral-50 transition-colors">
+            <button
+              onClick={() => window.alert('Pagination is not implemented in demo mode.')}
+              className="bg-white border border-neutral-200 text-neutral-700 px-6 py-2 rounded-lg hover:bg-neutral-50 transition-colors"
+            >
               Load More Transactions
             </button>
           </div>
@@ -545,7 +584,10 @@ export default function Financial() {
 
       <FormModal
         isOpen={showPaymentMethodModal}
-        onClose={() => setShowPaymentMethodModal(false)}
+        onClose={() => {
+          setSelectedPaymentMethod(null);
+          setShowPaymentMethodModal(false);
+        }}
         onSubmit={handleAddPaymentMethod}
         title={selectedPaymentMethod ? "Edit Payment Method" : "Add Payment Method"}
         subtitle={selectedPaymentMethod ? "Update your payment method details" : "Add a new payment method to your account"}

@@ -13,6 +13,33 @@ import {
 export default function ELibrary() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
+
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownload = (book) => {
+    const safeName = (book?.title || 'book').replace(/[^a-z0-9-_]+/gi, '_');
+    downloadTextFile(
+      `${safeName}-demo.txt`,
+      `JDI Lecturer E-Library Demo Download\n\nTitle: ${book?.title}\nAuthor: ${book?.author}\nISBN: ${book?.isbn}\nGenerated: ${new Date().toISOString()}\n`
+    );
+  };
+
+  const handleToggleBookmark = (book) => {
+    setBookmarkedIds(prev => (
+      prev.includes(book.id) ? prev.filter(id => id !== book.id) : [...prev, book.id]
+    ));
+  };
 
   const books = [
     {
@@ -110,6 +137,9 @@ export default function ELibrary() {
     const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+  const handlePreview = (book) => {
+    window.alert(`Preview is not implemented in demo mode.\n\n${book?.title}`);
+  };
 
   return (
     <div className="space-y-6">
@@ -120,11 +150,17 @@ export default function ELibrary() {
           <p className="text-neutral-600 mt-1">Browse and access digital resources</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button
+            onClick={() => window.alert('Bookmarks view is not implemented in demo mode.')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <BookmarkIcon className="w-4 h-4" />
             My Bookmarks
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button
+            onClick={() => window.alert('Book request is not implemented in demo mode.')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             Request Book
           </button>
@@ -250,11 +286,18 @@ export default function ELibrary() {
               <div className="flex items-center gap-2">
                 {book.available ? (
                   <>
-                    <button className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white py-2 px-3 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                    <button
+                      onClick={() => handleDownload(book)}
+                      className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white py-2 px-3 rounded-lg text-sm font-medium hover:shadow-lg transition-all"
+                    >
                       Download
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Bookmark">
-                      <BookmarkIcon className="w-4 h-4" />
+                    <button
+                      onClick={() => handleToggleBookmark(book)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                      title="Bookmark"
+                    >
+                      <BookmarkIcon className={`w-4 h-4 ${bookmarkedIds.includes(book.id) ? 'text-brand-primary' : ''}`} />
                     </button>
                   </>
                 ) : (
@@ -262,7 +305,11 @@ export default function ELibrary() {
                     Not Available
                   </button>
                 )}
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Preview">
+                <button
+                  onClick={() => handlePreview(book)}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  title="Preview"
+                >
                   <EyeIcon className="w-4 h-4" />
                 </button>
               </div>

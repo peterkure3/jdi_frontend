@@ -19,6 +19,46 @@ export default function Schedule() {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [view, setView] = useState('week');
 
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadIcs = () => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const now = new Date();
+    const dtstamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+    const icsLines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//JDI Demo//Lecturer Schedule//EN'
+    ];
+
+    schedule
+      .filter(item => item.code !== 'OH')
+      .slice(0, 10)
+      .forEach((item, idx) => {
+        const uid = `jdi-demo-${item.id}-${idx}@demo`;
+        icsLines.push('BEGIN:VEVENT');
+        icsLines.push(`UID:${uid}`);
+        icsLines.push(`DTSTAMP:${dtstamp}`);
+        icsLines.push(`SUMMARY:${item.code} ${item.course}`);
+        icsLines.push(`LOCATION:${item.room}`);
+        icsLines.push(`DESCRIPTION:${item.type} • ${item.time} • ${item.students} students`);
+        icsLines.push('END:VEVENT');
+      });
+
+    icsLines.push('END:VCALENDAR');
+    downloadTextFile('lecturer-schedule-demo.ics', icsLines.join('\r\n'));
+  };
+
   const schedule = [
     { id: 1, course: 'Computer Science 101', code: 'CS101', time: '09:00-10:30', day: 'Monday', room: 'Room 201', type: 'Lecture', students: 45 },
     { id: 2, course: 'Data Structures & Algorithms', code: 'CS201', time: '11:00-12:30', day: 'Tuesday', room: 'Room 305', type: 'Lecture', students: 38 },
@@ -99,7 +139,10 @@ export default function Schedule() {
               List
             </button>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-xl hover:shadow-lg transition-all">
+          <button
+            onClick={() => window.alert('Add session is not implemented in demo mode.')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             Add Session
           </button>
@@ -243,10 +286,18 @@ export default function Schedule() {
                           {classItem.type}
                         </span>
                         <div className="flex items-center gap-1">
-                          <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                          <button
+                            onClick={() => window.alert('Edit session is not implemented in demo mode.')}
+                            className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                            title="Edit"
+                          >
                             <PencilIcon className="w-4 h-4" />
                           </button>
-                          <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Cancel">
+                          <button
+                            onClick={() => window.alert('Cancel session is not implemented in demo mode.')}
+                            className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                            title="Cancel"
+                          >
                             <XMarkIcon className="w-4 h-4" />
                           </button>
                         </div>
@@ -300,7 +351,10 @@ export default function Schedule() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Schedule Class</h4>
           <p className="text-sm text-neutral-600 mb-4">Add new class sessions or office hours</p>
-          <button className="w-full bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={() => window.alert('Add session is not implemented in demo mode.')}
+            className="w-full bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Add Session
           </button>
         </div>
@@ -311,7 +365,10 @@ export default function Schedule() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Export Schedule</h4>
           <p className="text-sm text-neutral-600 mb-4">Download your teaching schedule</p>
-          <button className="w-full bg-gradient-to-r from-status-success to-accent-lime text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={downloadIcs}
+            className="w-full bg-gradient-to-r from-status-success to-accent-lime text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Export Calendar
           </button>
         </div>
@@ -322,7 +379,10 @@ export default function Schedule() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Notifications</h4>
           <p className="text-sm text-neutral-600 mb-4">Manage class reminders and alerts</p>
-          <button className="w-full bg-gradient-to-r from-accent-cyan to-accent-cyanDark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={() => window.alert('Reminders are not implemented in demo mode.')}
+            className="w-full bg-gradient-to-r from-accent-cyan to-accent-cyanDark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Set Reminders
           </button>
         </div>

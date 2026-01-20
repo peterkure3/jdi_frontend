@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   PlusIcon,
   UsersIcon,
@@ -11,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function Grades() {
+  const navigate = useNavigate();
   const [selectedCourse, setSelectedCourse] = useState('CS101');
   const [view, setView] = useState('overview');
 
@@ -95,7 +97,10 @@ export default function Grades() {
               </option>
             ))}
           </select>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button
+            onClick={() => navigate('/lecturer/assignments')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <PlusIcon className="w-4 h-4" />
             Add Assignment
           </button>
@@ -191,10 +196,18 @@ export default function Grades() {
                   <p className="text-sm text-neutral-500">Weight: {assignment.weight}% • Due: {new Date(assignment.due).toLocaleDateString()}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit Assignment">
+                  <button
+                    onClick={() => window.alert('Edit assignment is not implemented in demo mode.')}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Edit Assignment"
+                  >
                     <PencilIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Submissions">
+                  <button
+                    onClick={() => window.alert('View submissions is not implemented in demo mode.')}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="View Submissions"
+                  >
                     <EyeIcon className="w-4 h-4" />
                   </button>
                 </div>
@@ -358,7 +371,10 @@ export default function Grades() {
                       <div className={`font-bold ${getGradeColor(calculateWeightedGrade(student))}`}>
                         {calculateWeightedGrade(student).toFixed(1)}% ({getLetterGrade(calculateWeightedGrade(student))})
                       </div>
-                      <button className="text-sm text-brand-primary hover:text-brand-primaryDark transition-colors">
+                      <button
+                        onClick={() => navigate('/lecturer/messages')}
+                        className="text-sm text-brand-primary hover:text-brand-primaryDark transition-colors"
+                      >
                         Contact Student
                       </button>
                     </div>

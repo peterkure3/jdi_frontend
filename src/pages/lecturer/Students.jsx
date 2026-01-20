@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownTrayIcon,
   UserPlusIcon,
@@ -15,9 +16,32 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function Students() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
+
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = () => {
+    const rows = filteredStudents
+      .map(s => `${s.studentId}\t${s.name}\t${s.course}\t${s.grade}\t${s.attendance}%\t${s.status}`)
+      .join('\n');
+    downloadTextFile(
+      'lecturer-students-export-demo.txt',
+      `JDI Demo Students Export\n\nGenerated: ${new Date().toISOString()}\n\nID\tName\tCourse\tGrade\tAttendance\tStatus\n${rows}\n`
+    );
+  };
 
   const students = [
     {
@@ -155,11 +179,17 @@ export default function Students() {
           <p className="text-neutral-600 mt-1">Monitor student progress and performance</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
             Export Data
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button
+            onClick={() => navigate('/lecturer/messages')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <EnvelopeIcon className="w-4 h-4" />
             Send Message
           </button>
@@ -325,13 +355,24 @@ export default function Students() {
 
             <div className="pt-4 border-t border-neutral-100">
               <div className="flex items-center gap-2">
-                <button className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+                <button
+                  onClick={() => window.alert('Student details are not implemented in demo mode.')}
+                  className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+                >
                   View Details
                 </button>
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Send Message">
+                <button
+                  onClick={() => navigate('/lecturer/messages')}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  title="Send Message"
+                >
                   <EnvelopeIcon className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="View Grades">
+                <button
+                  onClick={() => navigate('/lecturer/grades')}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  title="View Grades"
+                >
                   <ChartBarIcon className="w-4 h-4" />
                 </button>
               </div>
@@ -353,7 +394,10 @@ export default function Students() {
                 {stats.atRisk} student{stats.atRisk > 1 ? 's are' : ' is'} at risk and may need additional support.
               </p>
             </div>
-            <button className="bg-status-error text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-status-error/90 transition-colors">
+            <button
+              onClick={() => window.alert('Review workflow is not implemented in demo mode.')}
+              className="bg-status-error text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-status-error/90 transition-colors"
+            >
               Review Students
             </button>
           </div>
@@ -368,7 +412,10 @@ export default function Students() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Send Announcement</h4>
           <p className="text-sm text-neutral-600 mb-4">Send messages to all or selected students</p>
-          <button className="w-full bg-accent-purple hover:bg-accent-purple/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={() => navigate('/lecturer/messages')}
+            className="w-full bg-accent-purple hover:bg-accent-purple/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Compose Message
           </button>
         </div>
@@ -379,7 +426,10 @@ export default function Students() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Performance Report</h4>
           <p className="text-sm text-neutral-600 mb-4">Generate detailed performance analytics</p>
-          <button className="w-full bg-status-success hover:bg-status-success/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={() => window.alert('Report generation is not implemented in demo mode.')}
+            className="w-full bg-status-success hover:bg-status-success/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Generate Report
           </button>
         </div>
@@ -390,7 +440,10 @@ export default function Students() {
           </div>
           <h4 className="font-semibold text-neutral-800 mb-2">Add Student</h4>
           <p className="text-sm text-neutral-600 mb-4">Enroll new students in your courses</p>
-          <button className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all">
+          <button
+            onClick={() => window.alert('Student enrollment is not implemented in demo mode.')}
+            className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
+          >
             Enroll Student
           </button>
         </div>

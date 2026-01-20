@@ -22,6 +22,18 @@ export default function Grades() {
   const [showContactInstructorModal, setShowContactInstructorModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const grades = [
     { id: 1, course: '3D Architectural Design', code: 'ARCH301', grade: 'B+', points: 87, credits: 4, semester: 'Fall 2024', assignments: [
       { name: 'Design Project 1', grade: 'A', points: 95, weight: 25 },
@@ -94,12 +106,16 @@ export default function Grades() {
 
   const handleDownloadTranscript = () => {
     console.log('Downloading transcript for period:', semesterFilter);
-    // Generate and download PDF transcript
+    const rows = filteredGrades.map(g => `${g.semester}\t${g.code}\t${g.course}\t${g.credits}\t${g.grade}\t${g.points}%`).join('\n');
+    downloadTextFile(
+      `transcript-${semesterFilter}-demo.txt`,
+      `JDI Demo Transcript\n\nFilter: ${semesterFilter}\nGenerated: ${new Date().toISOString()}\n\nSemester\tCode\tCourse\tCredits\tGrade\tPoints\n${rows}\n`
+    );
   };
 
   const handlePrintTranscript = () => {
     console.log('Printing transcript for period:', semesterFilter);
-    // Open print dialog
+    window.print();
   };
 
   const handleGradeDispute = async (disputeData) => {
@@ -121,7 +137,10 @@ export default function Grades() {
 
   const handleRequestGradeReport = () => {
     console.log('Requesting detailed grade report');
-    // Request comprehensive grade analysis
+    downloadTextFile(
+      'grade-report-demo.txt',
+      `JDI Demo Grade Report\n\nGenerated: ${new Date().toISOString()}\n\nThis is a demo-only report placeholder.\n`
+    );
   };
 
   // Field definitions

@@ -13,6 +13,19 @@ export default function ELibrary() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showToast, setShowToast] = useState(false);
+  const [bookmarkedIds, setBookmarkedIds] = useState([]);
+
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const books = [
     {
@@ -121,6 +134,21 @@ export default function ELibrary() {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
     console.log(`Downloading: ${book.title}`);
+    const safeName = (book?.title || 'book').replace(/[^a-z0-9-_]+/gi, '_');
+    downloadTextFile(
+      `${safeName}-demo.txt`,
+      `JDI E-Library Demo Download\n\nTitle: ${book?.title}\nAuthor: ${book?.author}\nISBN: ${book?.isbn}\nFormat: ${book?.format}\nGenerated: ${new Date().toISOString()}\n`
+    );
+  };
+
+  const handleToggleBookmark = (book) => {
+    setBookmarkedIds(prev => (
+      prev.includes(book.id) ? prev.filter(id => id !== book.id) : [...prev, book.id]
+    ));
+  };
+
+  const handlePreview = (book) => {
+    window.alert(`Preview is not implemented in demo mode.\n\n${book?.title}`);
   };
 
   return (
@@ -132,11 +160,17 @@ export default function ELibrary() {
           <p className="text-neutral-600 mt-1">Access digital books and resources for your courses</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors">
+          <button
+            onClick={() => window.alert('Bookmarks view is not implemented in demo mode.')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+          >
             <BookmarkIcon className="w-4 h-4" />
             My Bookmarks
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+          <button
+            onClick={() => window.alert('Reading history is not implemented in demo mode.')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+          >
             <ClockIcon className="w-4 h-4" />
             Reading History
           </button>
@@ -274,8 +308,12 @@ export default function ELibrary() {
                       <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
                       Download
                     </button>
-                    <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Bookmark">
-                      <BookmarkIcon className="w-4 h-4" />
+                    <button
+                      onClick={() => handleToggleBookmark(book)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                      title="Bookmark"
+                    >
+                      <BookmarkIcon className={`w-4 h-4 ${bookmarkedIds.includes(book.id) ? 'text-brand-primary' : ''}`} />
                     </button>
                   </>
                 ) : (
@@ -283,7 +321,11 @@ export default function ELibrary() {
                     Not Available
                   </button>
                 )}
-                <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Preview">
+                <button
+                  onClick={() => handlePreview(book)}
+                  className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  title="Preview"
+                >
                   <EyeIcon className="w-4 h-4" />
                 </button>
               </div>

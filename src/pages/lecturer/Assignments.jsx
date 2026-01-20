@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   PlusIcon,
@@ -23,6 +24,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function Assignments() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('active');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -164,12 +166,12 @@ export default function Assignments() {
 
   const handleViewSubmissions = (assignment) => {
     console.log('Viewing submissions for:', assignment.id);
-    // Navigate to submissions page or open submissions modal
+    window.alert('Submissions view is not implemented in demo mode.');
   };
 
   const handleGradeAssignment = (assignment) => {
     console.log('Grading assignment:', assignment.id);
-    // Navigate to grading interface
+    navigate('/lecturer/grades');
   };
 
   // Field definitions

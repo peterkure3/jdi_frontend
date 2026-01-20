@@ -1,4 +1,5 @@
 import OverviewCard from '../../components/shared/OverviewCard.jsx';
+import { useNavigate } from 'react-router-dom';
 import {
   AcademicCapIcon,
   BookOpenIcon,
@@ -13,6 +14,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function StudentDashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
@@ -64,7 +67,10 @@ export default function StudentDashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl shadow-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-neutral-800">Your Courses</h3>
-            <button className="text-sm text-brand-primary hover:text-brand-primaryDark transition-colors">
+            <button
+              onClick={() => navigate('/student/courses')}
+              className="text-sm text-brand-primary hover:text-brand-primaryDark transition-colors"
+            >
               View All Courses
             </button>
           </div>
@@ -93,7 +99,10 @@ export default function StudentDashboard() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-neutral-500">Next: {course.nextClass}</span>
-                  <button className="text-xs text-brand-primary hover:text-brand-primaryDark transition-colors">
+                  <button
+                    onClick={() => navigate('/student/courses')}
+                    className="text-xs text-brand-primary hover:text-brand-primaryDark transition-colors"
+                  >
                     Continue Learning
                   </button>
                 </div>
@@ -140,15 +149,24 @@ export default function StudentDashboard() {
             <h3 className="text-lg font-semibold mb-2">Quick Actions</h3>
             <p className="text-white/80 text-sm mb-4">Access your student tools</p>
             <div className="space-y-2">
-              <button className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center">
+              <button
+                onClick={() => navigate('/student/e-library')}
+                className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center"
+              >
                 <BookOpenIcon className="w-4 h-4 mr-2" />
                 E-Library
               </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center">
+              <button
+                onClick={() => navigate('/student/grades')}
+                className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center"
+              >
                 <ChartBarIcon className="w-4 h-4 mr-2" />
                 View Grades
               </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center">
+              <button
+                onClick={() => navigate('/student/schedule')}
+                className="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center"
+              >
                 <CalendarIcon className="w-4 h-4 mr-2" />
                 My Schedule
               </button>

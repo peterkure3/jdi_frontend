@@ -21,7 +21,7 @@ export default function Messages() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
 
-  const messages = [
+  const [messages, setMessages] = useState([
     {
       id: 1,
       from: 'Dr. Jane Smith',
@@ -70,7 +70,7 @@ export default function Messages() {
       priority: 'high',
       category: 'financial'
     }
-  ];
+  ].map(m => ({ ...m, isArchived: false })));
 
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,7 +80,7 @@ export default function Messages() {
                          (selectedFilter === 'unread' && !message.isRead) ||
                          (selectedFilter === 'priority' && message.priority === 'high') ||
                          message.category === selectedFilter;
-    return matchesSearch && matchesFilter;
+    return matchesSearch && matchesFilter && !message.isArchived;
   });
 
   const unreadCount = messages.filter(m => !m.isRead).length;
@@ -103,6 +103,33 @@ export default function Messages() {
       console.log('Replying to:', selectedMessage.id, 'with:', replyText);
       setReplyText('');
     }
+  };
+
+  const handleSelectMessage = (message) => {
+    setSelectedMessage(message);
+    if (!message.isRead) {
+      setMessages(prev => prev.map(m => (m.id === message.id ? { ...m, isRead: true } : m)));
+    }
+  };
+
+  const handleMarkUnread = () => {
+    if (!selectedMessage) return;
+    setMessages(prev => prev.map(m => (m.id === selectedMessage.id ? { ...m, isRead: false } : m)));
+    setSelectedMessage(prev => (prev ? { ...prev, isRead: false } : prev));
+  };
+
+  const handleArchive = () => {
+    if (!selectedMessage) return;
+    setMessages(prev => prev.map(m => (m.id === selectedMessage.id ? { ...m, isArchived: true } : m)));
+    setSelectedMessage(null);
+    setReplyText('');
+  };
+
+  const handleDelete = () => {
+    if (!selectedMessage) return;
+    setMessages(prev => prev.filter(m => m.id !== selectedMessage.id));
+    setSelectedMessage(null);
+    setReplyText('');
   };
 
   return (
@@ -163,7 +190,7 @@ export default function Messages() {
           {filteredMessages.map((message) => (
             <div
               key={message.id}
-              onClick={() => setSelectedMessage(message)}
+              onClick={() => handleSelectMessage(message)}
               className={`p-4 border-b border-neutral-100 cursor-pointer hover:bg-neutral-50 transition-colors ${
                 selectedMessage?.id === message.id ? 'bg-brand-primary/5 border-l-4 border-l-brand-primary' : ''
               } ${!message.isRead ? 'bg-blue-50/50' : ''}`}
@@ -229,13 +256,25 @@ export default function Messages() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Mark as Unread">
+                  <button
+                    onClick={handleMarkUnread}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Mark as Unread"
+                  >
                     <EnvelopeIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title="Archive">
+                  <button
+                    onClick={handleArchive}
+                    className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Archive"
+                  >
                     <ArchiveBoxIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                  <button
+                    onClick={handleDelete}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete"
+                  >
                     <TrashIcon className="w-4 h-4" />
                   </button>
                 </div>
@@ -267,7 +306,10 @@ export default function Messages() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <button className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors">
+                  <button
+                    onClick={() => window.alert('File attachments are not implemented in demo mode.')}
+                    className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors"
+                  >
                     <PaperClipIcon className="w-4 h-4" />
                     Attach File
                   </button>

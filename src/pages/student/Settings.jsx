@@ -60,6 +60,43 @@ export default function Settings() {
     }));
   };
 
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSaveChanges = async () => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    console.log('Saving student settings (demo):', formData);
+    window.alert('Settings saved (demo only).');
+  };
+
+  const handleUploadPhoto = () => {
+    window.alert('Photo upload is not implemented in demo mode.');
+  };
+
+  const handleRemovePhoto = () => {
+    window.alert('Photo removal is not implemented in demo mode.');
+  };
+
+  const handleChangePassword = () => {
+    window.alert('Change password is not implemented in demo mode.');
+  };
+
+  const handleExportMyData = () => {
+    downloadTextFile(
+      'student-settings-export-demo.json',
+      JSON.stringify({ exportedAt: new Date().toISOString(), settings: formData }, null, 2)
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -68,7 +105,10 @@ export default function Settings() {
           <h1 className="text-3xl font-bold text-neutral-800">Settings</h1>
           <p className="text-neutral-600 mt-1">Manage your account preferences and settings</p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all">
+        <button
+          onClick={handleSaveChanges}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
+        >
           <BookmarkIcon className="w-4 h-4" />
           Save Changes
         </button>
@@ -115,10 +155,16 @@ export default function Settings() {
                   <h3 className="text-lg font-semibold text-neutral-800">Profile Photo</h3>
                   <p className="text-sm text-neutral-600 mb-3">Update your profile picture</p>
                   <div className="flex items-center gap-3">
-                    <button className="bg-brand-primary hover:bg-brand-primary-dark text-white px-4 py-2 rounded-lg text-sm hover:bg-brand-primaryDark transition-colors">
+                    <button
+                      onClick={handleUploadPhoto}
+                      className="bg-brand-primary hover:bg-brand-primary-dark text-white px-4 py-2 rounded-lg text-sm hover:bg-brand-primaryDark transition-colors"
+                    >
                       Upload Photo
                     </button>
-                    <button className="bg-white border border-neutral-200 text-neutral-700 px-4 py-2 rounded-lg text-sm hover:bg-neutral-50 transition-colors">
+                    <button
+                      onClick={handleRemovePhoto}
+                      className="bg-white border border-neutral-200 text-neutral-700 px-4 py-2 rounded-lg text-sm hover:bg-neutral-50 transition-colors"
+                    >
                       Remove
                     </button>
                   </div>
@@ -378,11 +424,17 @@ export default function Settings() {
               <div className="border-t border-neutral-200 pt-6">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-4">Account Actions</h3>
                 <div className="space-y-3">
-                  <button className="w-full bg-white border border-neutral-200 text-neutral-700 py-3 px-4 rounded-lg font-medium hover:bg-neutral-50 transition-colors text-left">
+                  <button
+                    onClick={handleChangePassword}
+                    className="w-full bg-white border border-neutral-200 text-neutral-700 py-3 px-4 rounded-lg font-medium hover:bg-neutral-50 transition-colors text-left"
+                  >
                     <KeyIcon className="w-5 h-5 mr-3" />
                     Change Password
                   </button>
-                  <button className="w-full bg-white border border-neutral-200 text-neutral-700 py-3 px-4 rounded-lg font-medium hover:bg-neutral-50 transition-colors text-left">
+                  <button
+                    onClick={handleExportMyData}
+                    className="w-full bg-white border border-neutral-200 text-neutral-700 py-3 px-4 rounded-lg font-medium hover:bg-neutral-50 transition-colors text-left"
+                  >
                     <ArrowDownTrayIcon className="w-5 h-5 mr-3" />
                     Export My Data
                   </button>
