@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { FormModal } from '../../components/shared/modals';
+import BaseModal from '../../components/shared/modals/BaseModal';
 import {
   BookmarkIcon,
   PlusIcon,
@@ -14,6 +16,12 @@ export default function ELibrary() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
+  const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requests, setRequests] = useState([]);
+  const [requestStatus, setRequestStatus] = useState('');
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const downloadTextFile = (filename, text) => {
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -135,10 +143,18 @@ export default function ELibrary() {
                          book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          book.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesBookmarks = !showBookmarksOnly || bookmarkedIds.includes(book.id);
+    return matchesSearch && matchesCategory && matchesBookmarks;
   });
+
   const handlePreview = (book) => {
-    window.alert(`Preview is not implemented in demo mode.\n\n${book?.title}`);
+    setSelectedBook(book);
+    setShowPreviewModal(true);
+  };
+
+  const handleToggleBookmarksView = () => {
+    setShowBookmarksOnly(prev => !prev);
+    setSelectedCategory('all');
   };
 
   return (
@@ -150,19 +166,27 @@ export default function ELibrary() {
           <p className="text-neutral-600 mt-1">Browse and access digital resources</p>
         </div>
         <div className="flex items-center gap-3">
+          {requestStatus && (
+            <div className="text-sm text-status-success">{requestStatus}</div>
+          )}
           <button
-            onClick={() => window.alert('Bookmarks view is not implemented in demo mode.')}
+            onClick={handleToggleBookmarksView}
             className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
           >
             <BookmarkIcon className="w-4 h-4" />
-            My Bookmarks
+            {showBookmarksOnly ? 'All Books' : 'My Bookmarks'}
           </button>
           <button
-            onClick={() => window.alert('Book request is not implemented in demo mode.')}
+            onClick={() => setShowRequestModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl hover:shadow-lg transition-all"
           >
             <PlusIcon className="w-4 h-4" />
             Request Book
+            {requests.length > 0 && (
+              <span className="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-white/20">
+                {requests.length}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -325,6 +349,105 @@ export default function ELibrary() {
           <p className="text-neutral-500">Try adjusting your search terms or category filter</p>
         </div>
       )}
+
+      <FormModal
+        isOpen={showRequestModal}
+        onClose={() => setShowRequestModal(false)}
+        onSubmit={async (data) => {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setRequests(prev => [
+            {
+              id: Date.now(),
+              ...data,
+              requestedAt: new Date().toISOString()
+            },
+            ...prev
+          ]);
+          setRequestStatus(`Request submitted at ${new Date().toLocaleTimeString()}`);
+        }}
+        title="Request Book"
+        subtitle="Request a new title for the lecturer library (demo)"
+        submitText="Submit Request"
+        mode="create"
+        fields={[
+          { name: 'title', label: 'Title', type: 'text', required: true, fullWidth: true },
+          { name: 'author', label: 'Author', type: 'text', required: true, fullWidth: true },
+          { name: 'isbn', label: 'ISBN (optional)', type: 'text', required: false },
+          { name: 'notes', label: 'Notes (optional)', type: 'textarea', required: false, fullWidth: true, rows: 3 }
+        ]}
+        initialData={{ title: '', author: '', isbn: '', notes: '' }}
+      />
+
+      <BaseModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        title="Book Preview"
+        subtitle={selectedBook ? selectedBook.title : ''}
+        size="lg"
+      >
+        {selectedBook && (
+          <div className="space-y-4">
+            <div>
+              <div className="text-sm text-neutral-600">by {selectedBook.author}</div>
+              <div className="mt-2 inline-flex items-center gap-2">
+                <span className="px-2 py-1 bg-brand-primary/10 text-brand-primary text-xs rounded-full">{selectedBook.category}</span>
+                <span className={`px-2 py-1 text-xs rounded-full ${selectedBook.available ? 'bg-status-success/10 text-status-success' : 'bg-status-error/10 text-status-error'}`}>
+                  {selectedBook.available ? 'Available' : 'Not Available'}
+                </span>
+                {bookmarkedIds.includes(selectedBook.id) && (
+                  <span className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs rounded-full">Bookmarked</span>
+                )}
+              </div>
+            </div>
+
+            <div className="text-sm text-neutral-700">{selectedBook.description}</div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div className="flex justify-between gap-4 p-3 bg-neutral-50 rounded-lg">
+                <span className="text-neutral-600">Publisher</span>
+                <span className="text-neutral-800 font-medium">{selectedBook.publisher}</span>
+              </div>
+              <div className="flex justify-between gap-4 p-3 bg-neutral-50 rounded-lg">
+                <span className="text-neutral-600">Year</span>
+                <span className="text-neutral-800 font-medium">{selectedBook.year}</span>
+              </div>
+              <div className="flex justify-between gap-4 p-3 bg-neutral-50 rounded-lg">
+                <span className="text-neutral-600">Pages</span>
+                <span className="text-neutral-800 font-medium">{selectedBook.pages}</span>
+              </div>
+              <div className="flex justify-between gap-4 p-3 bg-neutral-50 rounded-lg">
+                <span className="text-neutral-600">Format</span>
+                <span className="text-neutral-800 font-medium">{selectedBook.format} ({selectedBook.size})</span>
+              </div>
+              <div className="flex justify-between gap-4 p-3 bg-neutral-50 rounded-lg md:col-span-2">
+                <span className="text-neutral-600">ISBN</span>
+                <span className="text-neutral-800 font-medium">{selectedBook.isbn}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => {
+                  handleToggleBookmark(selectedBook);
+                }}
+                className="px-4 py-2 bg-white border border-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors"
+              >
+                {bookmarkedIds.includes(selectedBook.id) ? 'Remove Bookmark' : 'Bookmark'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  handleDownload(selectedBook);
+                }}
+                disabled={!selectedBook.available}
+                className="px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 }

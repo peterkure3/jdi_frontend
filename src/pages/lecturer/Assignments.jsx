@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FormModal, ViewModal, ConfirmationModal } from '../../components/shared/modals';
+import BaseModal from '../../components/shared/modals/BaseModal';
 import {
   PlusIcon,
   QueueListIcon,
@@ -30,9 +31,10 @@ export default function Assignments() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
 
-  const assignments = {
+  const initialAssignments = {
     active: [
       {
         id: 1,
@@ -89,6 +91,21 @@ export default function Assignments() {
     ]
   };
 
+  const [assignments, setAssignments] = useState(initialAssignments);
+  const [submissionsByAssignmentId, setSubmissionsByAssignmentId] = useState({});
+
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -123,12 +140,69 @@ export default function Assignments() {
   const handleCreateAssignment = async (assignmentData) => {
     console.log('Creating assignment:', assignmentData);
     await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const newId = Date.now();
+    const courseLabel = assignmentFields
+      .find(f => f.name === 'course')
+      ?.options?.find(o => o.value === assignmentData.course)?.label;
+
+    const typeLabel = assignmentFields
+      .find(f => f.name === 'type')
+      ?.options?.find(o => o.value === assignmentData.type)?.value;
+
+    const dueDateValue = assignmentData?.dueDate
+      ? String(assignmentData.dueDate).slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+
+    const created = {
+      id: newId,
+      title: assignmentData.title,
+      course: courseLabel || assignmentData.course,
+      dueDate: dueDateValue,
+      submissions: 0,
+      totalStudents: 30,
+      status: 'draft',
+      type: typeLabel || assignmentData.type,
+      points: Number(assignmentData.points || 0),
+      description: assignmentData.description
+    };
+
+    setAssignments(prev => ({
+      ...prev,
+      draft: [created, ...prev.draft]
+    }));
+
+    setSelectedAssignment(null);
     setShowCreateModal(false);
   };
 
   const handleEditAssignment = async (assignmentData) => {
     console.log('Editing assignment:', selectedAssignment?.id, assignmentData);
     await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const courseLabel = assignmentFields
+      .find(f => f.name === 'course')
+      ?.options?.find(o => o.value === assignmentData.course)?.label;
+
+    const updated = {
+      ...selectedAssignment,
+      ...assignmentData,
+      course: courseLabel || assignmentData.course || selectedAssignment?.course,
+      points: Number(assignmentData.points ?? selectedAssignment?.points ?? 0),
+      dueDate: assignmentData?.dueDate
+        ? String(assignmentData.dueDate).slice(0, 10)
+        : selectedAssignment?.dueDate
+    };
+
+    setAssignments(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(key => {
+        next[key] = next[key].map(a => (a.id === updated.id ? updated : a));
+      });
+      return next;
+    });
+
+    setSelectedAssignment(updated);
     setShowEditModal(false);
   };
 
@@ -144,7 +218,13 @@ export default function Assignments() {
 
   const handleDuplicateAssignment = async (assignment) => {
     console.log('Duplicating assignment:', assignment.id);
-    setSelectedAssignment({...assignment, title: assignment.title + ' (Copy)'});
+    setSelectedAssignment({
+      ...assignment,
+      id: undefined,
+      submissions: 0,
+      status: 'draft',
+      title: `${assignment.title} (Copy)`
+    });
     setShowCreateModal(true);
   };
 
@@ -156,17 +236,94 @@ export default function Assignments() {
   const handleConfirmDelete = async () => {
     console.log('Deleting assignment:', selectedAssignment?.id);
     await new Promise(resolve => setTimeout(resolve, 1000));
+    setAssignments(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(key => {
+        next[key] = next[key].filter(a => a.id !== selectedAssignment?.id);
+      });
+      return next;
+    });
+    setSelectedAssignment(null);
     setShowDeleteModal(false);
   };
 
   const handlePublishAssignment = async (assignment) => {
     console.log('Publishing assignment:', assignment.id);
     await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setAssignments(prev => {
+      const draftItem = prev.draft.find(a => a.id === assignment.id);
+      if (!draftItem) return prev;
+
+      const published = { ...draftItem, status: 'active' };
+      return {
+        ...prev,
+        draft: prev.draft.filter(a => a.id !== assignment.id),
+        active: [published, ...prev.active]
+      };
+    });
   };
 
   const handleViewSubmissions = (assignment) => {
-    console.log('Viewing submissions for:', assignment.id);
-    window.alert('Submissions view is not implemented in demo mode.');
+    setSelectedAssignment(assignment);
+
+    setSubmissionsByAssignmentId(prev => {
+      if (prev[assignment.id]) return prev;
+
+      const submittedCount = Math.min(assignment.submissions, assignment.totalStudents);
+
+      const submissions = Array.from({ length: assignment.totalStudents }).map((_, idx) => {
+        const id = `STU-${String(1000 + idx)}`;
+        const submitted = idx < submittedCount;
+        const baseDate = new Date(assignment.dueDate);
+        const submittedAt = new Date(baseDate.getTime() - (idx % 6) * 24 * 60 * 60 * 1000);
+
+        return {
+          id,
+          name: `Student ${idx + 1}`,
+          status: submitted ? 'submitted' : 'missing',
+          submittedAt: submitted ? submittedAt.toISOString() : null,
+          score: submitted ? Math.round((0.6 + (idx % 5) * 0.08) * assignment.points) : null
+        };
+      });
+
+      return { ...prev, [assignment.id]: submissions };
+    });
+
+    setShowSubmissionsModal(true);
+  };
+
+  const handleUpdateSubmissionScore = (assignmentId, studentId, score, maxPoints) => {
+    const parsed = score === '' ? '' : Number(score);
+    const clamped = parsed === '' ? '' : Math.max(0, Math.min(maxPoints, parsed));
+
+    setSubmissionsByAssignmentId(prev => ({
+      ...prev,
+      [assignmentId]: (prev[assignmentId] || []).map(s =>
+        s.id === studentId
+          ? { ...s, score: clamped === '' ? null : clamped, status: 'graded' }
+          : s
+      )
+    }));
+  };
+
+  const handleExportSubmissionsCsv = (assignment) => {
+    const rows = submissionsByAssignmentId?.[assignment.id] || [];
+    const header = ['student_id', 'student_name', 'status', 'submitted_at', 'score'];
+    const csv = [header.join(',')]
+      .concat(
+        rows.map(r => [
+          r.id,
+          `"${String(r.name).replace(/"/g, '""')}"`,
+          r.status,
+          r.submittedAt || '',
+          r.score ?? ''
+        ].join(','))
+      )
+      .join('\n');
+
+    const safeTitle = (assignment.title || 'assignment').replace(/[^a-z0-9-_]+/gi, '_');
+    downloadTextFile(`submissions-${safeTitle}.csv`, csv);
   };
 
   const handleGradeAssignment = (assignment) => {
@@ -484,6 +641,100 @@ export default function Assignments() {
         cancelText="Cancel"
         type="danger"
       />
+
+      <BaseModal
+        isOpen={showSubmissionsModal}
+        onClose={() => setShowSubmissionsModal(false)}
+        title="Submissions"
+        subtitle={selectedAssignment ? `${selectedAssignment.title} • ${selectedAssignment.course}` : ''}
+        size="lg"
+      >
+        {selectedAssignment && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-neutral-600">
+                {selectedAssignment.submissions} / {selectedAssignment.totalStudents} submitted
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleExportSubmissionsCsv(selectedAssignment)}
+                  className="px-4 py-2 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors"
+                >
+                  Export CSV
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSubmissionsModal(false);
+                    navigate('/lecturer/grades');
+                  }}
+                  className="px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all"
+                >
+                  Open Gradebook
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto border border-neutral-200 rounded-lg">
+              <table className="min-w-full text-sm">
+                <thead className="bg-neutral-50">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium text-neutral-700">Student</th>
+                    <th className="text-left px-4 py-3 font-medium text-neutral-700">Status</th>
+                    <th className="text-left px-4 py-3 font-medium text-neutral-700">Submitted</th>
+                    <th className="text-left px-4 py-3 font-medium text-neutral-700">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(submissionsByAssignmentId?.[selectedAssignment.id] || []).map((row) => (
+                    <tr key={row.id} className="border-t border-neutral-100">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-neutral-800">{row.name}</div>
+                        <div className="text-xs text-neutral-500">{row.id}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                          row.status === 'missing'
+                            ? 'bg-status-error/10 text-status-error'
+                            : row.status === 'graded'
+                              ? 'bg-status-success/10 text-status-success'
+                              : 'bg-status-warning/10 text-status-warning'
+                        }`}>
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {row.submittedAt ? new Date(row.submittedAt).toLocaleString() : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {row.status === 'missing' ? (
+                          <span className="text-neutral-400">—</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <input
+                              value={row.score ?? ''}
+                              onChange={(e) => handleUpdateSubmissionScore(
+                                selectedAssignment.id,
+                                row.id,
+                                e.target.value,
+                                selectedAssignment.points
+                              )}
+                              className="w-24 px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+                              type="number"
+                              min={0}
+                              max={selectedAssignment.points}
+                            />
+                            <span className="text-neutral-500">/ {selectedAssignment.points}</span>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 }

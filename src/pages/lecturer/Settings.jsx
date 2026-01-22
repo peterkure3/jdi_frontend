@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { ConfirmationModal } from '../../components/shared/modals';
+import BaseModal from '../../components/shared/modals/BaseModal';
 import {
   BookmarkIcon,
   UserIcon,
@@ -13,6 +15,15 @@ import {
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
+  const fileInputRef = useRef(null);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
+  const [saveStatus, setSaveStatus] = useState('');
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordError, setPasswordError] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [accountDeleted, setAccountDeleted] = useState(false);
   const [formData, setFormData] = useState({
     firstName: 'Dr. Jane',
     lastName: 'Smith',
@@ -71,21 +82,27 @@ export default function Settings() {
   };
 
   const handleSaveChanges = async () => {
+    if (accountDeleted) return;
     await new Promise(resolve => setTimeout(resolve, 400));
     console.log('Saving lecturer settings (demo):', formData);
-    window.alert('Settings saved (demo only).');
+    setSaveStatus(`Saved at ${new Date().toLocaleTimeString()}`);
   };
 
   const handleUploadPhoto = () => {
-    window.alert('Photo upload is not implemented in demo mode.');
+    if (accountDeleted) return;
+    fileInputRef.current?.click();
   };
 
   const handleRemovePhoto = () => {
-    window.alert('Photo removal is not implemented in demo mode.');
+    if (accountDeleted) return;
+    setProfilePhotoUrl('');
   };
 
   const handleChangePassword = () => {
-    window.alert('Change password is not implemented in demo mode.');
+    if (accountDeleted) return;
+    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setPasswordError('');
+    setShowChangePasswordModal(true);
   };
 
   const handleExportMyData = () => {
@@ -96,9 +113,8 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = () => {
-    const ok = window.confirm('Delete account? (demo)');
-    if (!ok) return;
-    window.alert('Delete account is not implemented in demo mode.');
+    if (accountDeleted) return;
+    setShowDeleteModal(true);
   };
 
   return (
@@ -109,14 +125,26 @@ export default function Settings() {
           <h1 className="text-3xl font-bold text-neutral-800">Settings</h1>
           <p className="text-neutral-600 mt-1">Manage your account preferences and settings</p>
         </div>
-        <button
-          onClick={handleSaveChanges}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-xl hover:shadow-lg transition-all"
-        >
-          <BookmarkIcon className="w-4 h-4" />
-          Save Changes
-        </button>
+        <div className="flex items-center gap-4">
+          {saveStatus && (
+            <div className="text-sm text-status-success">{saveStatus}</div>
+          )}
+          <button
+            onClick={handleSaveChanges}
+            disabled={accountDeleted}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-xl hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <BookmarkIcon className="w-4 h-4" />
+            Save Changes
+          </button>
+        </div>
       </div>
+
+      {accountDeleted && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-800">
+          This account has been deleted (demo). Settings are now read-only.
+        </div>
+      )}
 
       {/* Settings Tabs */}
       <div className="bg-white rounded-xl shadow-card">
@@ -152,8 +180,12 @@ export default function Settings() {
           {activeTab === 'profile' && (
             <div className="space-y-6">
               <div className="flex items-center gap-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
+                <div className="w-24 h-24 bg-gradient-to-br from-brand-primary to-brand-primaryDark rounded-full flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+                  {profilePhotoUrl ? (
+                    <img src={profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{formData.firstName.charAt(0)}{formData.lastName.charAt(0)}</span>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-neutral-800">Profile Photo</h3>
@@ -161,12 +193,14 @@ export default function Settings() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handleUploadPhoto}
+                      disabled={accountDeleted}
                       className="bg-brand-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-brand-primaryDark transition-colors"
                     >
                       Upload Photo
                     </button>
                     <button
                       onClick={handleRemovePhoto}
+                      disabled={accountDeleted}
                       className="bg-white border border-neutral-200 text-neutral-700 px-4 py-2 rounded-lg text-sm hover:bg-neutral-50 transition-colors"
                     >
                       Remove
@@ -174,6 +208,23 @@ export default function Settings() {
                   </div>
                 </div>
               </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setProfilePhotoUrl(String(reader.result || ''));
+                  };
+                  reader.readAsDataURL(file);
+                  e.target.value = '';
+                }}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -416,7 +467,8 @@ export default function Settings() {
                 <div className="space-y-3">
                   <button
                     onClick={handleChangePassword}
-                    className="w-full bg-white border border-neutral-200 text-neutral-700 py-3 px-4 rounded-lg font-medium hover:bg-neutral-50 transition-colors text-left"
+                    disabled={accountDeleted}
+                    className="w-full bg-white border border-neutral-200 text-neutral-700 py-3 px-4 rounded-lg font-medium hover:bg-neutral-50 transition-colors text-left disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <KeyIcon className="w-5 h-5 mr-3" />
                     Change Password
@@ -430,7 +482,8 @@ export default function Settings() {
                   </button>
                   <button
                     onClick={handleDeleteAccount}
-                    className="w-full bg-red-50 border border-red-200 text-red-700 py-3 px-4 rounded-lg font-medium hover:bg-red-100 transition-colors text-left"
+                    disabled={accountDeleted}
+                    className="w-full bg-red-50 border border-red-200 text-red-700 py-3 px-4 rounded-lg font-medium hover:bg-red-100 transition-colors text-left disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <TrashIcon className="w-5 h-5 mr-3" />
                     Delete Account
@@ -441,6 +494,113 @@ export default function Settings() {
           )}
         </div>
       </div>
+
+      <BaseModal
+        isOpen={showChangePasswordModal}
+        onClose={() => {
+          if (isChangingPassword) return;
+          setShowChangePasswordModal(false);
+        }}
+        title="Change Password"
+        subtitle="Update your account password (demo)"
+        size="md"
+      >
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (isChangingPassword) return;
+            setPasswordError('');
+            if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+              setPasswordError('All fields are required.');
+              return;
+            }
+            if (passwordForm.newPassword.length < 8) {
+              setPasswordError('New password must be at least 8 characters.');
+              return;
+            }
+            if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+              setPasswordError('New password and confirmation do not match.');
+              return;
+            }
+
+            setIsChangingPassword(true);
+            await new Promise(resolve => setTimeout(resolve, 600));
+            setIsChangingPassword(false);
+            setShowChangePasswordModal(false);
+            setSaveStatus(`Password updated at ${new Date().toLocaleTimeString()}`);
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">Current Password</label>
+            <input
+              type="password"
+              value={passwordForm.currentPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+              disabled={isChangingPassword}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">New Password</label>
+            <input
+              type="password"
+              value={passwordForm.newPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+              disabled={isChangingPassword}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">Confirm New Password</label>
+            <input
+              type="password"
+              value={passwordForm.confirmPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+              disabled={isChangingPassword}
+            />
+          </div>
+
+          {passwordError && (
+            <div className="text-sm text-status-error">{passwordError}</div>
+          )}
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowChangePasswordModal(false)}
+              disabled={isChangingPassword}
+              className="px-4 py-2 bg-white border border-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isChangingPassword}
+              className="px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isChangingPassword ? 'Saving...' : 'Update Password'}
+            </button>
+          </div>
+        </form>
+      </BaseModal>
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Delete Account"
+        message="This will delete your account in demo mode and make settings read-only."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={async () => {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setAccountDeleted(true);
+          setShowDeleteModal(false);
+          setSaveStatus('');
+        }}
+      />
     </div>
   );
 }

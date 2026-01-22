@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FormModal } from '../../components/shared/modals';
+import BaseModal from '../../components/shared/modals/BaseModal';
 import {
   PlusIcon,
   UsersIcon,
@@ -15,6 +17,9 @@ export default function Grades() {
   const navigate = useNavigate();
   const [selectedCourse, setSelectedCourse] = useState('CS101');
   const [view, setView] = useState('overview');
+  const [showEditAssignmentModal, setShowEditAssignmentModal] = useState(false);
+  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
 
   const courses = [
     { code: 'CS101', name: 'Computer Science 101', students: 45 },
@@ -22,7 +27,7 @@ export default function Grades() {
     { code: 'CS301', name: 'Web Development', students: 32 }
   ];
 
-  const gradeData = {
+  const initialGradeData = {
     CS101: {
       assignments: [
         { id: 1, name: 'Assignment 1: Basic Programming', weight: 15, avgGrade: 85, submissions: 43, due: '2024-02-15' },
@@ -43,9 +48,34 @@ export default function Grades() {
         lowestGrade: 58
       }
     }
+    ,
+    CS201: {
+      assignments: [],
+      students: [],
+      stats: { avgGPA: 0, passRate: 0, highestGrade: 0, lowestGrade: 0 }
+    },
+    CS301: {
+      assignments: [],
+      students: [],
+      stats: { avgGPA: 0, passRate: 0, highestGrade: 0, lowestGrade: 0 }
+    }
   };
 
-  const currentCourseData = gradeData[selectedCourse];
+  const [gradeData, setGradeData] = useState(initialGradeData);
+
+  const currentCourseData = gradeData[selectedCourse] || { assignments: [], students: [], stats: { avgGPA: 0, passRate: 0, highestGrade: 0, lowestGrade: 0 } };
+
+  const downloadTextFile = (filename, text) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const getGradeColor = (grade) => {
     if (grade >= 90) return 'text-status-success';
@@ -75,6 +105,77 @@ export default function Grades() {
     });
     
     return totalWeight > 0 ? totalWeighted / totalWeight : 0;
+  };
+
+  const recalcAssignmentStats = (courseData) => {
+    const nextAssignments = courseData.assignments.map(a => {
+      const grades = courseData.students
+        .map(s => s.grades?.[a.id])
+        .filter(g => g !== null && g !== undefined);
+      const submissions = grades.length;
+      const avg = submissions > 0 ? Math.round(grades.reduce((sum, g) => sum + g, 0) / submissions) : 0;
+      return { ...a, submissions, avgGrade: avg };
+    });
+
+    const nextStudents = courseData.students.map(s => ({
+      ...s,
+      total: calculateWeightedGrade(s)
+    }));
+
+    return {
+      ...courseData,
+      assignments: nextAssignments,
+      students: nextStudents
+    };
+  };
+
+  const handleOpenEditAssignment = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowEditAssignmentModal(true);
+  };
+
+  const handleOpenSubmissions = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowSubmissionsModal(true);
+  };
+
+  const handleUpdateStudentGrade = (assignmentId, studentRowId, value) => {
+    const parsed = value === '' ? null : Number(value);
+    const clamped = parsed === null ? null : Math.max(0, Math.min(100, parsed));
+
+    setGradeData(prev => {
+      const courseData = prev[selectedCourse];
+      const nextCourseData = {
+        ...courseData,
+        students: courseData.students.map(s =>
+          s.id === studentRowId
+            ? { ...s, grades: { ...s.grades, [assignmentId]: clamped } }
+            : s
+        )
+      };
+
+      return {
+        ...prev,
+        [selectedCourse]: recalcAssignmentStats(nextCourseData)
+      };
+    });
+  };
+
+  const handleExportSubmissionsCsv = () => {
+    if (!selectedAssignment || !currentCourseData) return;
+    const header = ['student_id', 'student_name', 'grade'];
+    const csv = [header.join(',')]
+      .concat(
+        currentCourseData.students.map(s => [
+          s.studentId,
+          `"${String(s.name).replace(/"/g, '""')}"`,
+          s.grades?.[selectedAssignment.id] ?? ''
+        ].join(','))
+      )
+      .join('\n');
+
+    const safe = (selectedAssignment.name || 'assignment').replace(/[^a-z0-9-_]+/gi, '_');
+    downloadTextFile(`submissions-${selectedCourse}-${safe}.csv`, csv);
   };
 
   return (
@@ -197,14 +298,14 @@ export default function Grades() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => window.alert('Edit assignment is not implemented in demo mode.')}
+                    onClick={() => handleOpenEditAssignment(assignment)}
                     className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
                     title="Edit Assignment"
                   >
                     <PencilIcon className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => window.alert('View submissions is not implemented in demo mode.')}
+                    onClick={() => handleOpenSubmissions(assignment)}
                     className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
                     title="View Submissions"
                   >
@@ -384,6 +485,103 @@ export default function Grades() {
           </div>
         </div>
       )}
+
+      <FormModal
+        isOpen={showEditAssignmentModal}
+        onClose={() => setShowEditAssignmentModal(false)}
+        onSubmit={async (data) => {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          if (!selectedAssignment) return;
+
+          setGradeData(prev => {
+            const courseData = prev[selectedCourse];
+            const updatedAssignment = {
+              ...selectedAssignment,
+              name: data.name,
+              weight: Number(data.weight),
+              due: data.due
+            };
+
+            const nextCourseData = {
+              ...courseData,
+              assignments: courseData.assignments.map(a => (a.id === updatedAssignment.id ? updatedAssignment : a))
+            };
+
+            return {
+              ...prev,
+              [selectedCourse]: recalcAssignmentStats(nextCourseData)
+            };
+          });
+        }}
+        title="Edit Assignment"
+        subtitle="Update assignment metadata"
+        submitText="Save"
+        mode="edit"
+        fields={[
+          { name: 'name', label: 'Name', type: 'text', required: true, fullWidth: true },
+          { name: 'weight', label: 'Weight (%)', type: 'number', required: true, min: 0, max: 100 },
+          { name: 'due', label: 'Due Date', type: 'date', required: true }
+        ]}
+        initialData={selectedAssignment ? {
+          name: selectedAssignment.name,
+          weight: selectedAssignment.weight,
+          due: selectedAssignment.due
+        } : {}}
+      />
+
+      <BaseModal
+        isOpen={showSubmissionsModal}
+        onClose={() => setShowSubmissionsModal(false)}
+        title="Submissions"
+        subtitle={selectedAssignment ? `${selectedCourse} • ${selectedAssignment.name}` : ''}
+        size="lg"
+      >
+        {selectedAssignment && currentCourseData && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-neutral-600">
+                Average: {selectedAssignment.avgGrade > 0 ? `${selectedAssignment.avgGrade}%` : 'N/A'} • Submissions: {selectedAssignment.submissions}
+              </div>
+              <button
+                onClick={handleExportSubmissionsCsv}
+                className="px-4 py-2 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors"
+              >
+                Export CSV
+              </button>
+            </div>
+
+            <div className="overflow-x-auto border border-neutral-200 rounded-lg">
+              <table className="min-w-full text-sm">
+                <thead className="bg-neutral-50">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium text-neutral-700">Student</th>
+                    <th className="text-left px-4 py-3 font-medium text-neutral-700">ID</th>
+                    <th className="text-left px-4 py-3 font-medium text-neutral-700">Grade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentCourseData.students.map(s => (
+                    <tr key={s.id} className="border-t border-neutral-100">
+                      <td className="px-4 py-3 font-medium text-neutral-800">{s.name}</td>
+                      <td className="px-4 py-3 text-neutral-600">{s.studentId}</td>
+                      <td className="px-4 py-3">
+                        <input
+                          value={s.grades?.[selectedAssignment.id] ?? ''}
+                          onChange={(e) => handleUpdateStudentGrade(selectedAssignment.id, s.id, e.target.value)}
+                          className="w-28 px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+                          type="number"
+                          min={0}
+                          max={100}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 }

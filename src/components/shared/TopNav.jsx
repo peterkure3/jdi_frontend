@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storage, KEYS } from '../../lib/storage.js';
 import {
+  Bars3Icon,
   MagnifyingGlassIcon,
   BellIcon,
-  UserIcon
+  UserIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
-export default function TopNav() {
+export default function TopNav({ isMobileSidebarOpen = false, onToggleMobileSidebar }) {
   const navigate = useNavigate();
   const email = storage.get(KEYS.email, 'user@example.com');
   const role = storage.get(KEYS.role, 'user');
@@ -56,6 +58,21 @@ export default function TopNav() {
   return (
     <div className="flex items-center justify-between px-6 py-4">
       <div className="flex items-center gap-4">
+        {typeof onToggleMobileSidebar === 'function' && (
+          <button
+            type="button"
+            onClick={onToggleMobileSidebar}
+            className="lg:hidden p-2 rounded-xl hover:bg-neutral-100 transition-colors"
+            aria-label={isMobileSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+            aria-expanded={isMobileSidebarOpen}
+          >
+            {isMobileSidebarOpen ? (
+              <XMarkIcon className="w-5 h-5 text-neutral-700" />
+            ) : (
+              <Bars3Icon className="w-5 h-5 text-neutral-700" />
+            )}
+          </button>
+        )}
         <h1 className="text-xl font-semibold text-neutral-800">JDI Portal</h1>
         <div className="hidden lg:flex items-center gap-2">
           <span className="text-sm text-neutral-500">Welcome back,</span>

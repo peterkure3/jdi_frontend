@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormModal, ConfirmationModal } from '../../components/shared/modals';
 import {
   ArrowUpTrayIcon,
   DocumentIcon,
@@ -20,6 +21,15 @@ import {
 export default function Materials() {
   const [activeTab, setActiveTab] = useState('documents');
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [uploadForm, setUploadForm] = useState({
+    course: 'Computer Science 101',
+    category: 'Documents',
+    name: '',
+    size: '1.0 MB'
+  });
 
   const downloadTextFile = (filename, text) => {
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -56,19 +66,48 @@ export default function Materials() {
   };
 
   const handleEdit = (material) => {
-    window.alert(`Edit is not implemented in demo mode.\n\n${material?.name}`);
+    setSelectedMaterial(material);
+    setShowEditModal(true);
   };
 
   const handleDelete = (material) => {
-    window.alert(`Delete is not implemented in demo mode.\n\n${material?.name}`);
+    setSelectedMaterial(material);
+    setShowDeleteModal(true);
   };
 
   const handleUpload = () => {
-    window.alert('Upload is not implemented in demo mode.');
+    const fileName = uploadForm.name?.trim();
+    if (!fileName) return;
+
+    const ext = fileName.includes('.') ? fileName.split('.').pop().toLowerCase() : '';
+    const normalizedCategory = String(uploadForm.category || '').toLowerCase();
+    const categoryKey =
+      normalizedCategory === 'documents' ? 'documents'
+      : normalizedCategory === 'videos' ? 'videos'
+      : normalizedCategory === 'presentations' ? 'presentations'
+      : 'other';
+
+    const created = {
+      id: Date.now(),
+      name: fileName,
+      size: uploadForm.size || '1.0 MB',
+      type: ext || (categoryKey === 'videos' ? 'mp4' : categoryKey === 'presentations' ? 'pptx' : 'pdf'),
+      course: uploadForm.course,
+      uploadDate: new Date().toISOString().slice(0, 10),
+      downloads: 0
+    };
+
+    setMaterials(prev => ({
+      ...prev,
+      [categoryKey]: [created, ...(prev[categoryKey] || [])]
+    }));
+
+    setActiveTab(categoryKey);
     setShowUploadModal(false);
+    setUploadForm(prev => ({ ...prev, name: '', size: '1.0 MB' }));
   };
 
-  const materials = {
+  const initialMaterials = {
     documents: [
       { id: 1, name: 'Course Syllabus.pdf', size: '2.4 MB', type: 'pdf', course: 'Computer Science 101', uploadDate: '2024-03-15', downloads: 45 },
       { id: 2, name: 'Lecture Notes - Week 1.docx', size: '1.8 MB', type: 'docx', course: 'Computer Science 101', uploadDate: '2024-03-14', downloads: 32 },
@@ -87,6 +126,8 @@ export default function Materials() {
       { id: 9, name: 'Dataset Sample.csv', size: '3.1 MB', type: 'csv', course: 'Data Analysis', uploadDate: '2024-03-09', downloads: 15 }
     ]
   };
+
+  const [materials, setMaterials] = useState(initialMaterials);
 
   const getFileIcon = (type) => {
     switch (type) {
@@ -286,7 +327,11 @@ export default function Materials() {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">Course</label>
-                <select className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors">
+                <select
+                  value={uploadForm.course}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, course: e.target.value }))}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+                >
                   <option>Computer Science 101</option>
                   <option>Data Structures</option>
                   <option>Database Systems</option>
@@ -295,12 +340,34 @@ export default function Materials() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">Category</label>
-                <select className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors">
+                <select
+                  value={uploadForm.category}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+                >
                   <option>Documents</option>
                   <option>Videos</option>
                   <option>Presentations</option>
                   <option>Other</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">File Name</label>
+                <input
+                  value={uploadForm.name}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+                  placeholder="e.g. Lecture Notes Week 2.pdf"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Size</label>
+                <input
+                  value={uploadForm.size}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, size: e.target.value }))}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+                  placeholder="e.g. 2.4 MB"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">File</label>
@@ -313,6 +380,7 @@ export default function Materials() {
               <div className="flex items-center gap-3 pt-4">
                 <button
                   onClick={handleUpload}
+                  disabled={!uploadForm.name.trim()}
                   className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white py-2 rounded-lg font-medium hover:shadow-lg transition-all"
                 >
                   Upload Material
@@ -328,6 +396,59 @@ export default function Materials() {
           </div>
         </div>
       )}
+
+      <FormModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={async (data) => {
+          await new Promise(resolve => setTimeout(resolve, 400));
+          const updated = {
+            ...selectedMaterial,
+            ...data,
+            downloads: Number(data.downloads ?? selectedMaterial?.downloads ?? 0)
+          };
+          setMaterials(prev => {
+            const next = { ...prev };
+            Object.keys(next).forEach(key => {
+              next[key] = next[key].map(m => (m.id === updated.id ? updated : m));
+            });
+            return next;
+          });
+          setSelectedMaterial(updated);
+        }}
+        title="Edit Material"
+        subtitle="Update material details"
+        fields={[
+          { name: 'name', label: 'Name', type: 'text', required: true, fullWidth: true },
+          { name: 'course', label: 'Course', type: 'text', required: true, fullWidth: true },
+          { name: 'size', label: 'Size', type: 'text', required: true },
+          { name: 'downloads', label: 'Downloads', type: 'number', required: true, min: 0 }
+        ]}
+        initialData={selectedMaterial || {}}
+        submitText="Save Changes"
+        mode="edit"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={async () => {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          setMaterials(prev => {
+            const next = { ...prev };
+            Object.keys(next).forEach(key => {
+              next[key] = next[key].filter(m => m.id !== selectedMaterial?.id);
+            });
+            return next;
+          });
+          setSelectedMaterial(null);
+        }}
+        title="Delete Material"
+        message={`Are you sure you want to delete "${selectedMaterial?.name}"?`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

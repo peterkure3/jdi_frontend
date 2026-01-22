@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FormModal, ViewModal } from '../../components/shared/modals';
+import BaseModal from '../../components/shared/modals/BaseModal';
 import {
   ArrowDownTrayIcon,
   UserPlusIcon,
@@ -20,6 +22,11 @@ export default function Students() {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showStudentDetailsModal, setShowStudentDetailsModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [reviewedAtRiskIds, setReviewedAtRiskIds] = useState([]);
 
   const downloadTextFile = (filename, text) => {
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -33,17 +40,35 @@ export default function Students() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExport = () => {
-    const rows = filteredStudents
+  const handleExport = (rows) => {
+    const body = rows
       .map(s => `${s.studentId}\t${s.name}\t${s.course}\t${s.grade}\t${s.attendance}%\t${s.status}`)
       .join('\n');
     downloadTextFile(
       'lecturer-students-export-demo.txt',
-      `JDI Demo Students Export\n\nGenerated: ${new Date().toISOString()}\n\nID\tName\tCourse\tGrade\tAttendance\tStatus\n${rows}\n`
+      `JDI Demo Students Export\n\nGenerated: ${new Date().toISOString()}\n\nID\tName\tCourse\tGrade\tAttendance\tStatus\n${body}\n`
     );
   };
 
-  const students = [
+  const handleGenerateReport = () => {
+    const header = ['student_id', 'name', 'course', 'grade', 'attendance', 'status', 'last_activity'];
+    const csv = [header.join(',')]
+      .concat(
+        filteredStudents.map(s => [
+          s.studentId,
+          `"${String(s.name).replace(/"/g, '""')}"`,
+          s.course,
+          s.grade,
+          s.attendance,
+          s.status,
+          s.lastActivity
+        ].join(','))
+      )
+      .join('\n');
+    downloadTextFile('lecturer-students-performance-report.csv', csv);
+  };
+
+  const initialStudents = [
     {
       id: 1,
       name: 'Alice Johnson',
@@ -130,6 +155,8 @@ export default function Students() {
     }
   ];
 
+  const [students, setStudents] = useState(initialStudents);
+
   // const courses = ['all', 'CS101', 'CS201', 'CS301'];
 
   const filteredStudents = students.filter(student => {
@@ -140,6 +167,8 @@ export default function Students() {
                          student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesCourse && matchesSearch;
   });
+
+  const atRiskStudents = students.filter(s => s.status === 'at_risk');
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -170,6 +199,17 @@ export default function Students() {
     avgAttendance: Math.round(students.reduce((sum, s) => sum + s.attendance, 0) / students.length)
   };
 
+  const handleViewDetails = (student) => {
+    setSelectedStudent(student);
+    setShowStudentDetailsModal(true);
+  };
+
+  const handleToggleReviewed = (studentId) => {
+    setReviewedAtRiskIds(prev => (
+      prev.includes(studentId) ? prev.filter(id => id !== studentId) : [...prev, studentId]
+    ));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -180,7 +220,7 @@ export default function Students() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={handleExport}
+            onClick={() => handleExport(filteredStudents)}
             className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
@@ -356,7 +396,7 @@ export default function Students() {
             <div className="pt-4 border-t border-neutral-100">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => window.alert('Student details are not implemented in demo mode.')}
+                  onClick={() => handleViewDetails(student)}
                   className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
                 >
                   View Details
@@ -395,7 +435,7 @@ export default function Students() {
               </p>
             </div>
             <button
-              onClick={() => window.alert('Review workflow is not implemented in demo mode.')}
+              onClick={() => setShowReviewModal(true)}
               className="bg-status-error text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-status-error/90 transition-colors"
             >
               Review Students
@@ -427,7 +467,7 @@ export default function Students() {
           <h4 className="font-semibold text-neutral-800 mb-2">Performance Report</h4>
           <p className="text-sm text-neutral-600 mb-4">Generate detailed performance analytics</p>
           <button
-            onClick={() => window.alert('Report generation is not implemented in demo mode.')}
+            onClick={handleGenerateReport}
             className="w-full bg-status-success hover:bg-status-success/90 text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
           >
             Generate Report
@@ -441,13 +481,158 @@ export default function Students() {
           <h4 className="font-semibold text-neutral-800 mb-2">Add Student</h4>
           <p className="text-sm text-neutral-600 mb-4">Enroll new students in your courses</p>
           <button
-            onClick={() => window.alert('Student enrollment is not implemented in demo mode.')}
+            onClick={() => setShowEnrollModal(true)}
             className="w-full bg-accent-cyan hover:bg-accent-cyan-dark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
           >
             Enroll Student
           </button>
         </div>
       </div>
+
+      <ViewModal
+        isOpen={showStudentDetailsModal}
+        onClose={() => setShowStudentDetailsModal(false)}
+        title="Student Details"
+        subtitle={selectedStudent ? `${selectedStudent.name} • ${selectedStudent.studentId}` : ''}
+        data={selectedStudent ? {
+          ...selectedStudent,
+          assignments: `${selectedStudent.assignments.completed}/${selectedStudent.assignments.total}`
+        } : {}}
+        fields={[
+          { name: 'name', label: 'Name', type: 'text' },
+          { name: 'studentId', label: 'Student ID', type: 'text' },
+          { name: 'email', label: 'Email', type: 'email' },
+          { name: 'courseName', label: 'Course', type: 'text' },
+          { name: 'grade', label: 'Grade', type: 'text' },
+          { name: 'attendance', label: 'Attendance', type: 'percentage' },
+          { name: 'status', label: 'Status', type: 'status' },
+          { name: 'lastActivity', label: 'Last Activity', type: 'date' },
+          { name: 'assignments', label: 'Assignments', type: 'multiline', fullWidth: true }
+        ]}
+        actions={[
+          {
+            label: 'Message',
+            onClick: () => {
+              setShowStudentDetailsModal(false);
+              navigate('/lecturer/messages');
+            },
+            variant: 'secondary'
+          },
+          {
+            label: 'View Grades',
+            onClick: () => {
+              setShowStudentDetailsModal(false);
+              navigate('/lecturer/grades');
+            },
+            variant: 'primary'
+          }
+        ]}
+      />
+
+      <BaseModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        title="At-Risk Students"
+        subtitle="Review and track follow-ups"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div className="text-sm text-neutral-600">
+            {atRiskStudents.length} student{atRiskStudents.length === 1 ? '' : 's'} currently flagged as at risk.
+          </div>
+
+          <div className="space-y-3">
+            {atRiskStudents.map(s => (
+              <div key={s.id} className="flex items-center justify-between p-4 border border-neutral-200 rounded-lg">
+                <div>
+                  <div className="font-medium text-neutral-800">{s.name}</div>
+                  <div className="text-sm text-neutral-600">{s.studentId} • {s.course}</div>
+                  <div className="text-xs text-neutral-500">Grade: {s.grade} • Attendance: {s.attendance}%</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleViewDetails(s)}
+                    className="px-4 py-2 bg-white border border-neutral-200 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors"
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => handleToggleReviewed(s.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      reviewedAtRiskIds.includes(s.id)
+                        ? 'bg-status-success/10 text-status-success'
+                        : 'bg-status-warning/10 text-status-warning'
+                    }`}
+                  >
+                    {reviewedAtRiskIds.includes(s.id) ? 'Reviewed' : 'Mark Reviewed'}
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {atRiskStudents.length === 0 && (
+              <div className="text-neutral-500">No at-risk students.</div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200">
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="px-6 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg transition-all"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </BaseModal>
+
+      <FormModal
+        isOpen={showEnrollModal}
+        onClose={() => setShowEnrollModal(false)}
+        onSubmit={async (data) => {
+          await new Promise(resolve => setTimeout(resolve, 600));
+          const newStudent = {
+            id: Date.now(),
+            name: data.name,
+            email: data.email,
+            studentId: data.studentId,
+            course: data.course,
+            courseName:
+              data.course === 'CS101' ? 'Computer Science 101'
+              : data.course === 'CS201' ? 'Data Structures & Algorithms'
+              : 'Web Development',
+            grade: 'N/A',
+            attendance: 0,
+            assignments: { completed: 0, total: 0 },
+            lastActivity: new Date().toISOString().slice(0, 10),
+            status: 'active',
+            avatar: (data.name || 'S').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()
+          };
+          setStudents(prev => [newStudent, ...prev]);
+          setSelectedCourse('all');
+          setFilter('all');
+        }}
+        title="Enroll Student"
+        subtitle="Add a new student to your course roster"
+        submitText="Enroll"
+        mode="create"
+        fields={[
+          { name: 'name', label: 'Full Name', type: 'text', required: true, fullWidth: true },
+          { name: 'email', label: 'Email', type: 'email', required: true, fullWidth: true },
+          { name: 'studentId', label: 'Student ID', type: 'text', required: true },
+          { name: 'course', label: 'Course', type: 'select', required: true, options: [
+            { value: 'CS101', label: 'CS101' },
+            { value: 'CS201', label: 'CS201' },
+            { value: 'CS301', label: 'CS301' }
+          ]}
+        ]}
+        initialData={{
+          name: '',
+          email: '',
+          studentId: '',
+          course: 'CS101'
+        }}
+      />
     </div>
   );
 }

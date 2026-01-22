@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { FormModal, ConfirmationModal } from '../../components/shared/modals';
+import BaseModal from '../../components/shared/modals/BaseModal';
 import {
   PlusIcon,
   ClockIcon,
@@ -18,6 +20,17 @@ import {
 export default function Schedule() {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [view, setView] = useState('week');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showRemindersModal, setShowRemindersModal] = useState(false);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [reminders, setReminders] = useState({
+    enabled: true,
+    minutesBefore: 15,
+    email: true,
+    inApp: true
+  });
 
   const downloadTextFile = (filename, text) => {
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -59,7 +72,7 @@ export default function Schedule() {
     downloadTextFile('lecturer-schedule-demo.ics', icsLines.join('\r\n'));
   };
 
-  const schedule = [
+  const initialSchedule = [
     { id: 1, course: 'Computer Science 101', code: 'CS101', time: '09:00-10:30', day: 'Monday', room: 'Room 201', type: 'Lecture', students: 45 },
     { id: 2, course: 'Data Structures & Algorithms', code: 'CS201', time: '11:00-12:30', day: 'Tuesday', room: 'Room 305', type: 'Lecture', students: 38 },
     { id: 3, course: 'Computer Science 101', code: 'CS101', time: '09:00-10:30', day: 'Wednesday', room: 'Room 201', type: 'Lecture', students: 45 },
@@ -69,6 +82,8 @@ export default function Schedule() {
     { id: 7, course: 'Office Hours', code: 'OH', time: '15:00-17:00', day: 'Tuesday', room: 'Office 302', type: 'Office Hours', students: 0 },
     { id: 8, course: 'Office Hours', code: 'OH', time: '13:00-15:00', day: 'Thursday', room: 'Office 302', type: 'Office Hours', students: 0 }
   ];
+
+  const [schedule, setSchedule] = useState(initialSchedule);
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const timeSlots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
@@ -87,6 +102,64 @@ export default function Schedule() {
     return schedule.find(item => 
       item.day === day && item.time.startsWith(timeSlot)
     );
+  };
+
+  const handleOpenAddSession = () => {
+    setSelectedSession(null);
+    setShowAddModal(true);
+  };
+
+  const handleOpenEditSession = (session) => {
+    setSelectedSession(session);
+    setShowEditModal(true);
+  };
+
+  const handleOpenCancelSession = (session) => {
+    setSelectedSession(session);
+    setShowCancelModal(true);
+  };
+
+  const handleAddSession = async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const id = Date.now();
+    const start = data.startTime || '09:00';
+    const end = data.endTime || '10:00';
+    const created = {
+      id,
+      course: data.course,
+      code: data.code,
+      time: `${start}-${end}`,
+      day: data.day,
+      room: data.room,
+      type: data.type,
+      students: Number(data.students || 0)
+    };
+    setSchedule(prev => [created, ...prev]);
+  };
+
+  const handleEditSession = async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const start = data.startTime || '09:00';
+    const end = data.endTime || '10:00';
+    const updated = {
+      ...selectedSession,
+      course: data.course,
+      code: data.code,
+      time: `${start}-${end}`,
+      day: data.day,
+      room: data.room,
+      type: data.type,
+      students: Number(data.students || 0)
+    };
+    setSchedule(prev => prev.map(s => (s.id === selectedSession?.id ? updated : s)));
+    setSelectedSession(updated);
+  };
+
+  const handleConfirmCancel = async () => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    setSchedule(prev => prev.filter(s => s.id !== selectedSession?.id));
+    setSelectedSession(null);
+    setShowCancelModal(false);
   };
 
   const upcomingClasses = schedule
@@ -140,7 +213,7 @@ export default function Schedule() {
             </button>
           </div>
           <button
-            onClick={() => window.alert('Add session is not implemented in demo mode.')}
+            onClick={handleOpenAddSession}
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-primary to-brand-primaryDark text-white rounded-xl hover:shadow-lg transition-all"
           >
             <PlusIcon className="w-4 h-4" />
@@ -287,14 +360,14 @@ export default function Schedule() {
                         </span>
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => window.alert('Edit session is not implemented in demo mode.')}
+                            onClick={() => handleOpenEditSession(classItem)}
                             className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
                             title="Edit"
                           >
                             <PencilIcon className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => window.alert('Cancel session is not implemented in demo mode.')}
+                            onClick={() => handleOpenCancelSession(classItem)}
                             className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
                             title="Cancel"
                           >
@@ -352,7 +425,7 @@ export default function Schedule() {
           <h4 className="font-semibold text-neutral-800 mb-2">Schedule Class</h4>
           <p className="text-sm text-neutral-600 mb-4">Add new class sessions or office hours</p>
           <button
-            onClick={() => window.alert('Add session is not implemented in demo mode.')}
+            onClick={handleOpenAddSession}
             className="w-full bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
           >
             Add Session
@@ -380,13 +453,158 @@ export default function Schedule() {
           <h4 className="font-semibold text-neutral-800 mb-2">Notifications</h4>
           <p className="text-sm text-neutral-600 mb-4">Manage class reminders and alerts</p>
           <button
-            onClick={() => window.alert('Reminders are not implemented in demo mode.')}
+            onClick={() => setShowRemindersModal(true)}
             className="w-full bg-gradient-to-r from-accent-cyan to-accent-cyanDark text-white rounded-lg py-2 text-sm font-medium hover:shadow-md transition-all"
           >
             Set Reminders
           </button>
         </div>
       </div>
+
+      <FormModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddSession}
+        title="Add Session"
+        subtitle="Create a new class session or office hour"
+        submitText="Add Session"
+        mode="create"
+        fields={[
+          { name: 'course', label: 'Course', type: 'text', required: true, fullWidth: true },
+          { name: 'code', label: 'Code', type: 'text', required: true },
+          { name: 'type', label: 'Type', type: 'select', required: true, options: [
+            { value: 'Lecture', label: 'Lecture' },
+            { value: 'Lab', label: 'Lab' },
+            { value: 'Office Hours', label: 'Office Hours' },
+            { value: 'Meeting', label: 'Meeting' }
+          ]},
+          { name: 'day', label: 'Day', type: 'select', required: true, options: days.map(d => ({ value: d, label: d })) },
+          { name: 'startTime', label: 'Start Time', type: 'text', required: true, placeholder: '09:00' },
+          { name: 'endTime', label: 'End Time', type: 'text', required: true, placeholder: '10:30' },
+          { name: 'room', label: 'Room', type: 'text', required: true },
+          { name: 'students', label: 'Students', type: 'number', required: true, min: 0 }
+        ]}
+        initialData={{
+          course: '',
+          code: '',
+          type: 'Lecture',
+          day: 'Monday',
+          startTime: '09:00',
+          endTime: '10:30',
+          room: '',
+          students: 0
+        }}
+      />
+
+      <FormModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleEditSession}
+        title="Edit Session"
+        subtitle="Update session details"
+        submitText="Save Changes"
+        mode="edit"
+        fields={[
+          { name: 'course', label: 'Course', type: 'text', required: true, fullWidth: true },
+          { name: 'code', label: 'Code', type: 'text', required: true },
+          { name: 'type', label: 'Type', type: 'select', required: true, options: [
+            { value: 'Lecture', label: 'Lecture' },
+            { value: 'Lab', label: 'Lab' },
+            { value: 'Office Hours', label: 'Office Hours' },
+            { value: 'Meeting', label: 'Meeting' }
+          ]},
+          { name: 'day', label: 'Day', type: 'select', required: true, options: days.map(d => ({ value: d, label: d })) },
+          { name: 'startTime', label: 'Start Time', type: 'text', required: true },
+          { name: 'endTime', label: 'End Time', type: 'text', required: true },
+          { name: 'room', label: 'Room', type: 'text', required: true },
+          { name: 'students', label: 'Students', type: 'number', required: true, min: 0 }
+        ]}
+        initialData={selectedSession ? {
+          course: selectedSession.course,
+          code: selectedSession.code,
+          type: selectedSession.type,
+          day: selectedSession.day,
+          startTime: selectedSession.time.split('-')[0],
+          endTime: selectedSession.time.split('-')[1],
+          room: selectedSession.room,
+          students: selectedSession.students
+        } : {}}
+      />
+
+      <ConfirmationModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleConfirmCancel}
+        title="Cancel Session"
+        message={selectedSession ? `Cancel ${selectedSession.code} • ${selectedSession.course} on ${selectedSession.day} at ${selectedSession.time}?` : 'Cancel this session?'}
+        confirmText="Cancel Session"
+        cancelText="Keep"
+        type="warning"
+      />
+
+      <BaseModal
+        isOpen={showRemindersModal}
+        onClose={() => setShowRemindersModal(false)}
+        title="Reminders"
+        subtitle="Configure teaching schedule notifications"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <label className="flex items-center gap-2 text-sm text-neutral-700">
+            <input
+              type="checkbox"
+              checked={reminders.enabled}
+              onChange={(e) => setReminders(prev => ({ ...prev, enabled: e.target.checked }))}
+              className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20"
+            />
+            Enable reminders
+          </label>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">Minutes before</label>
+            <input
+              type="number"
+              min={0}
+              value={reminders.minutesBefore}
+              onChange={(e) => setReminders(prev => ({ ...prev, minutesBefore: Number(e.target.value || 0) }))}
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors"
+              disabled={!reminders.enabled}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
+              <input
+                type="checkbox"
+                checked={reminders.inApp}
+                onChange={(e) => setReminders(prev => ({ ...prev, inApp: e.target.checked }))}
+                className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20"
+                disabled={!reminders.enabled}
+              />
+              In-app notifications
+            </label>
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
+              <input
+                type="checkbox"
+                checked={reminders.email}
+                onChange={(e) => setReminders(prev => ({ ...prev, email: e.target.checked }))}
+                className="rounded border-neutral-300 text-brand-primary focus:ring-brand-primary/20"
+                disabled={!reminders.enabled}
+              />
+              Email notifications
+            </label>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200">
+            <button
+              onClick={() => setShowRemindersModal(false)}
+              className="px-6 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg transition-all"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </BaseModal>
     </div>
   );
 }

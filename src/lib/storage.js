@@ -53,4 +53,5 @@ export const KEYS = {
   recentDownloads: 'recentDownloads',
   profilePicture: 'profilePicture',
   studentsData: 'studentsData',
+  sidebarCollapsed: 'sidebarCollapsed',
 };
