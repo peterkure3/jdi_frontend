@@ -44,7 +44,7 @@ export default function Materials() {
   };
 
   const handleDownload = (material) => {
-    const safeName = (material?.name || 'material').replace(/[^a-z0-9-_\.]+/gi, '_');
+    const safeName = (material?.name || 'material').replace(/[^a-z0-9-_/]+/gi, '_');
     downloadTextFile(
       `material-${safeName}-demo.txt`,
       `JDI Demo Material Download\n\nName: ${material?.name}\nCourse: ${material?.course}\nSize: ${material?.size}\nUploaded: ${material?.uploadDate}\nGenerated: ${new Date().toISOString()}\n`

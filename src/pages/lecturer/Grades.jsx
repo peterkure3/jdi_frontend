@@ -258,7 +258,7 @@ export default function Grades() {
 
       {/* View Toggle */}
       <div className="bg-white rounded-xl shadow-card p-6">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setView('overview')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -360,11 +360,53 @@ export default function Grades() {
           <div className="px-6 py-4 border-b border-neutral-100">
             <h3 className="text-lg font-semibold text-neutral-800">Student Gradebook</h3>
           </div>
-          <div className="overflow-x-auto">
+
+          <div className="p-4 space-y-3 md:hidden">
+            {currentCourseData?.students.map((student) => {
+              const weightedGrade = calculateWeightedGrade(student);
+              return (
+                <div key={student.id} className="border border-neutral-200 rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-neutral-800 truncate">{student.name}</div>
+                      <div className="text-sm text-neutral-500">{student.studentId}</div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className={`text-lg font-bold ${getGradeColor(weightedGrade)}`}>{weightedGrade.toFixed(1)}</div>
+                      <div className={`text-sm font-semibold ${getGradeColor(weightedGrade)}`}>{getLetterGrade(weightedGrade)}</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-1 gap-2">
+                    {currentCourseData?.assignments.map((assignment) => {
+                      const grade = student.grades?.[assignment.id];
+                      return (
+                        <div key={assignment.id} className="flex items-center justify-between gap-3 rounded-lg bg-neutral-50 px-3 py-2">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-neutral-700 truncate">{assignment.name.split(':')[0]}</div>
+                            <div className="text-xs text-neutral-500">Weight: {assignment.weight}%</div>
+                          </div>
+                          <div className="shrink-0">
+                            {grade !== null && grade !== undefined ? (
+                              <span className={`font-semibold ${getGradeColor(grade)}`}>{grade}</span>
+                            ) : (
+                              <span className="text-neutral-400">-</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-neutral-50 border-b border-neutral-200">
                 <tr>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-neutral-600">Student</th>
+                  <th className="sticky left-0 z-10 bg-neutral-50 text-left px-6 py-4 text-sm font-medium text-neutral-600">Student</th>
                   {currentCourseData?.assignments.map(assignment => (
                     <th key={assignment.id} className="text-center px-4 py-4 text-sm font-medium text-neutral-600 min-w-[100px]">
                       {assignment.name.split(':')[0]}
@@ -380,7 +422,7 @@ export default function Grades() {
                   const weightedGrade = calculateWeightedGrade(student);
                   return (
                     <tr key={student.id} className="hover:bg-neutral-50 transition-colors">
-                      <td className="px-6 py-4">
+                      <td className="sticky left-0 z-10 bg-white px-6 py-4">
                         <div className="font-medium text-neutral-800">{student.name}</div>
                         <div className="text-sm text-neutral-500">{student.studentId}</div>
                       </td>
