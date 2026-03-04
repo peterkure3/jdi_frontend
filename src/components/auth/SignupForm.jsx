@@ -41,7 +41,7 @@ export default function SignupForm({ onSwitch }) {
         <label className="block text-sm font-medium text-neutral-700">Email Address</label>
         <input
           type="email"
-          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all placeholder-neutral-400"
+          className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all placeholder-neutral-400"
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -54,7 +54,7 @@ export default function SignupForm({ onSwitch }) {
         <label className="block text-sm font-medium text-neutral-700">Password</label>
         <input
           type="password"
-          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all placeholder-neutral-400"
+          className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all placeholder-neutral-400"
           placeholder="Create a password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -67,7 +67,7 @@ export default function SignupForm({ onSwitch }) {
         <label className="block text-sm font-medium text-neutral-700">Confirm Password</label>
         <input
           type="password"
-          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all placeholder-neutral-400"
+          className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all placeholder-neutral-400"
           placeholder="Confirm your password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -79,7 +79,7 @@ export default function SignupForm({ onSwitch }) {
       <div className="space-y-2">
         <label className="block text-sm font-medium text-neutral-700">Account Type</label>
         <select
-          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+          className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
           value={role}
           onChange={(e) => setRole(e.target.value)}
           disabled={isLoading}
@@ -100,7 +100,7 @@ export default function SignupForm({ onSwitch }) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-black hover:bg-red-600 text-white rounded-xl py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-black hover:bg-red-600 text-white rounded-xl py-2.5 font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isLoading ? (
           <>

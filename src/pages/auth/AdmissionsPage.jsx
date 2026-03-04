@@ -51,6 +51,9 @@ export default function AdmissionsPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
 
   const totalPages = 6;
 
@@ -73,8 +76,34 @@ export default function AdmissionsPage() {
   };
 
   const handleNext = () => {
+    // Require payment completion before proceeding to Review & Submit
+    if (currentPage === 5 && !isPaymentCompleted) {
+      setPaymentError('Please complete the payment before proceeding to submit your application.');
+      return;
+    }
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePayment = async () => {
+    if (!formData.paymentMethod) {
+      setPaymentError('Please select a payment method.');
+      return;
+    }
+    
+    setIsProcessingPayment(true);
+    setPaymentError('');
+    
+    // Simulate payment processing
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsPaymentCompleted(true);
+      setPaymentError('');
+    } catch (error) {
+      setPaymentError('Payment failed. Please try again.');
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -762,6 +791,52 @@ export default function AdmissionsPage() {
                               </ul>
                             </div>
                           </div>
+                        </div>
+
+                        {/* Payment Action Section */}
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                          <h4 className="font-semibold text-green-800 mb-4">Complete Application Fee Payment</h4>
+                          <p className="text-sm text-green-700 mb-4">
+                            You must complete the application fee payment of <strong>$50</strong> before submitting your application.
+                          </p>
+                          
+                          {/* Payment Error */}
+                          {paymentError && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                              <p className="text-sm text-red-700">{paymentError}</p>
+                            </div>
+                          )}
+
+                          {/* Payment Status */}
+                          {isPaymentCompleted ? (
+                            <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-300 rounded-lg">
+                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-lg">✓</span>
+                              </div>
+                              <div>
+                                <p className="font-medium text-green-800">Payment Completed Successfully!</p>
+                                <p className="text-sm text-green-700">You can now proceed to review and submit your application.</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handlePayment}
+                              disabled={isProcessingPayment}
+                              className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                              {isProcessingPayment ? (
+                                <>
+                                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                  Processing Payment...
+                                </>
+                              ) : (
+                                <>
+                                  Pay $50 Application Fee
+                                </>
+                              )}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

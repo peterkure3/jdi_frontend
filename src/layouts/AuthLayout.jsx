@@ -79,17 +79,17 @@ export default function AuthLayout() {
 
       {/* Main Content */}
       <div className="flex items-center justify-center p-4 min-h-[calc(100vh-4rem)]">
-        <div className="w-full max-w-6xl grid md:grid-cols-[45%_55%] bg-white rounded-[3.3rem] shadow-[0_60px_40px_-30px_rgba(178,31,56,0.4)] overflow-hidden min-h-[600px]">
+        <div className="w-full max-w-6xl grid md:grid-cols-[45%_55%] bg-white rounded-[3.3rem] shadow-[0_60px_40px_-30px_rgba(178,31,56,0.4)] overflow-hidden">
           <div className="flex items-center justify-center p-8 lg:p-12 bg-white">
             <div className="w-full max-w-sm">
               <Outlet />
             </div>
           </div>
-          <div className="hidden md:flex flex-col relative overflow-hidden rounded-r-[3.3rem] p-8">
+          <div className="hidden md:flex flex-col relative overflow-hidden rounded-r-[3.3rem] p-6 h-[600px]">
             {/* Carousel Card Container */}
             <div className="flex flex-col bg-white rounded-[1.5rem] shadow-xl overflow-hidden h-full">
               {/* Top Image Section */}
-              <div className="relative h-1/2 overflow-hidden rounded-t-[1.5rem]">
+              <div className="relative h-3/4 overflow-hidden rounded-t-[1.5rem]">
                 {slides.map((slide, index) => (
                   <div
                     key={index}
@@ -104,15 +104,6 @@ export default function AuthLayout() {
                     />
                   </div>
                 ))}
-                
-                {/* Logo positioned on image */}
-                <div className="absolute bottom-4 right-4">
-                  <img 
-                    src="/logo.png" 
-                    alt="Joadah Design Institute"
-                    className="w-12 h-12 object-contain bg-white/95 rounded-lg p-1.5 shadow-sm"
-                  />
-                </div>
               </div>
             
               {/* Bottom Colored Section */}

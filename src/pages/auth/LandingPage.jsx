@@ -35,14 +35,9 @@ export default function LandingPage() {
 
   return (
     <div className="w-full">
-      <div className="text-center mb-8">
-        <img 
-          src="/logo.png" 
-          alt="Joadah Design Institute"
-          className="w-48 h-24 mx-auto mb-6 object-contain"
-        />
-        <h1 className="text-3xl font-bold text-neutral-800 mb-2">Welcome</h1>
-        <p className="text-neutral-600">Please register. Sign up</p>
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-neutral-800 mb-1">Welcome</h1>
+        <p className="text-neutral-500 text-sm">Sign in to your account or create a new one</p>
       </div>
 
       <div className="mb-6">
@@ -79,7 +74,7 @@ export default function LandingPage() {
         position="bottom-right"
       />
       
-      <div className="mt-8 p-4 bg-neutral-50 rounded-xl">
+      <div className="mt-2 p-4 bg-neutral-50 rounded-xl">
         <div className="text-xs font-medium text-neutral-700 mb-2">Demo Credentials:</div>
         <div className="space-y-1 text-xs text-neutral-600">
           <div className="flex justify-between">
