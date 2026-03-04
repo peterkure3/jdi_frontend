@@ -784,7 +784,7 @@ export default function AdmissionsPage() {
                             <div>
                               <h4 className="font-medium text-yellow-800 mb-1">Payment Information</h4>
                               <ul className="text-sm text-yellow-700 space-y-1">
-                                <li>• A non-refundable application fee of $50 is required</li>
+                                <li>• A non-refundable application fee of UGX50,000 is required</li>
                                 <li>• Tuition fees vary by program and can be found on our website</li>
                                 <li>• Payment plans are available with 0% interest</li>
                                 <li>• Financial aid applications are processed separately</li>
@@ -797,7 +797,7 @@ export default function AdmissionsPage() {
                         <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                           <h4 className="font-semibold text-green-800 mb-4">Complete Application Fee Payment</h4>
                           <p className="text-sm text-green-700 mb-4">
-                            You must complete the application fee payment of <strong>$50</strong> before submitting your application.
+                            You must complete the application fee payment of <strong>UGX50,000</strong> before submitting your application.
                           </p>
                           
                           {/* Payment Error */}
@@ -832,7 +832,7 @@ export default function AdmissionsPage() {
                                 </>
                               ) : (
                                 <>
-                                  Pay $50 Application Fee
+                                  Pay UGX50,000 Application Fee
                                 </>
                               )}
                             </button>
